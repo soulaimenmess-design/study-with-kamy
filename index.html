@@ -1,0 +1,819 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Study with Kamy</title>
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0b1220;--card:#141d33;--card2:#1a2540;--border:#253357;--blue:#3b82f6;--gold:#f5b544;--green:#2dd4a0;--purple:#a78bfa;--red:#ef4444;--gray:#8b9bb8;--text:#e8eefc}
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Tajawal',sans-serif}
+body{background:var(--bg);color:var(--text);min-height:100vh}
+a{color:inherit;text-decoration:none}
+.view{display:none;padding:20px 5% 90px;max-width:1000px;margin:0 auto;animation:fade .3s}
+.view.active{display:block}
+@keyframes fade{from{opacity:0;transform:translateY(10px)}to{opacity:1}}
+#lock{position:fixed;inset:0;background:var(--bg);z-index:999;display:flex;align-items:center;justify-content:center;padding:20px}
+.lock-box{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:36px 30px;max-width:400px;width:100%;text-align:center}
+.lock-box .logo-big{font-size:1.9rem;font-weight:800}
+.lock-box .logo-big span{color:var(--blue)}
+.lock-box p{color:var(--gray);font-size:.9rem;margin:10px 0 20px;line-height:1.8}
+.lock-box input{width:100%;background:#0f1a30;border:1px solid var(--border);border-radius:12px;color:var(--text);padding:13px;text-align:center;font-size:1.05rem;outline:none;margin-bottom:12px;letter-spacing:2px}
+.lock-err{color:var(--red);font-size:.85rem;min-height:20px;margin-top:6px}
+.lock-icon{width:70px;height:70px;margin:0 auto 16px;border-radius:20px;background:linear-gradient(135deg,var(--blue),#7c5cff);display:grid;place-items:center;font-size:2rem}
+.btn{background:var(--blue);color:#fff;border:none;padding:11px 24px;border-radius:10px;font-weight:700;font-size:.95rem;cursor:pointer;transition:.2s}
+.btn:hover{background:#2f6fe0}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.btn.green{background:#22c55e}.btn.green:hover{background:#16a34a}
+.btn.red{background:#dc2626}.btn.red:hover{background:#b91c1c}
+.btn.ghost{background:transparent;border:1px solid var(--border);color:var(--text)}
+.btn.sm{padding:7px 14px;font-size:.82rem}
+.btn.xs{padding:4px 10px;font-size:.72rem}
+.inp{width:100%;background:#0f1a30;border:1px solid var(--border);border-radius:10px;color:var(--text);padding:12px 14px;font-size:.95rem;outline:none;margin-bottom:12px;font-family:inherit}
+.inp:focus{border-color:var(--blue)}
+textarea.inp{min-height:80px;resize:vertical}
+header{position:sticky;top:0;z-index:50;background:rgba(11,18,32,.93);backdrop-filter:blur(8px);border-bottom:1px solid var(--border);padding:12px 5%;display:flex;align-items:center;justify-content:space-between}
+.logo{display:flex;align-items:center;gap:10px;font-weight:800;font-size:1.1rem;cursor:pointer}
+.logo .icon{width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,var(--blue),#7c5cff);display:grid;place-items:center}
+.logo em{font-style:normal;color:var(--blue)}
+.h-user{display:flex;align-items:center;gap:10px}
+.avatar{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,var(--gold),#f97316);display:grid;place-items:center;font-weight:800;color:#111}
+.h-xp{background:var(--card2);border:1px solid var(--border);border-radius:99px;padding:5px 14px;font-size:.8rem;font-weight:700;color:var(--gold)}
+#bottomNav{position:fixed;bottom:0;right:0;left:0;background:rgba(20,29,51,.97);border-top:1px solid var(--border);display:flex;justify-content:space-around;padding:8px 4px calc(8px + env(safe-area-inset-bottom));z-index:60}
+#bottomNav a{display:flex;flex-direction:column;align-items:center;gap:2px;font-size:.66rem;color:var(--gray);padding:4px 8px;border-radius:10px;cursor:pointer}
+#bottomNav a.on{color:var(--blue)}
+#bottomNav a .i{font-size:1.25rem}
+.card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:20px}
+.card.hoverable{cursor:pointer;transition:.2s}
+.card.hoverable:hover{transform:translateY(-3px);border-color:var(--blue)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:14px}
+.sec-title{display:flex;align-items:center;gap:10px;font-size:1.2rem;font-weight:800;margin:8px 0 18px}
+.sec-title .bar{width:5px;height:24px;border-radius:4px;background:var(--gold)}
+.muted{color:var(--gray);font-size:.85rem}
+.welcome{background:linear-gradient(135deg,#1b2a52,#141d33);border:1px solid var(--border);border-radius:20px;padding:24px;margin-bottom:18px}
+.welcome h2{font-size:1.4rem;margin-bottom:4px}
+.welcome h2 span{color:var(--gold)}
+.welcome .mot{color:#c8d6ef;font-size:.9rem;margin-top:8px;line-height:1.7}
+.countdown{display:flex;gap:10px;margin-top:16px;flex-wrap:wrap}
+.cd-box{background:#0f1a30;border:1px solid var(--border);border-radius:12px;padding:10px 16px;text-align:center;min-width:70px}
+.cd-box b{display:block;font-size:1.4rem;color:var(--blue)}
+.cd-box span{font-size:.7rem;color:var(--gray)}
+.stat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:12px;margin-bottom:18px}
+.stat{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:14px;text-align:center}
+.stat .v{font-size:1.4rem;font-weight:800}
+.stat .l{font-size:.72rem;color:var(--gray);margin-top:4px}
+.streak-v{color:var(--gold)}.prog-v{color:var(--green)}.xp-v{color:var(--purple)}
+.task{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:16px;margin-bottom:12px;transition:.2s;cursor:pointer}
+.task:hover{border-color:var(--blue)}
+.task.done{opacity:.65;border-color:var(--green)}
+.task .row{display:flex;align-items:center;gap:12px}
+.task .ic{width:44px;height:44px;border-radius:13px;display:grid;place-items:center;font-size:1.25rem;flex-shrink:0}
+.task .info{flex:1}
+.task .info b{font-size:.95rem}
+.task .info p{font-size:.78rem;color:var(--gray);margin-top:2px}
+.task .time{font-size:.72rem;color:var(--blue);font-weight:700;white-space:nowrap}
+.check{width:28px;height:28px;border-radius:50%;border:2px solid var(--border);display:grid;place-items:center;color:transparent;flex-shrink:0}
+.task.done .check{background:var(--green);border-color:var(--green);color:#06281c}
+.pts{list-style:none;margin-top:12px;border-top:1px dashed var(--border);padding-top:10px}
+.pts li{font-size:.82rem;color:#c8d6ef;padding:3px 0;padding-right:16px;position:relative;line-height:1.6}
+.pts li::before{content:'•';color:var(--gold);position:absolute;right:0}
+.day-tag{display:inline-block;font-size:.68rem;background:#22345f;color:#7ea6ff;padding:3px 12px;border-radius:99px;font-weight:700;margin-bottom:8px}
+.opt{display:flex;align-items:center;gap:14px;background:var(--card);border:1px solid var(--border);border-radius:14px;padding:16px;margin-bottom:12px;cursor:pointer;transition:.2s}
+.opt:hover{border-color:var(--blue)}
+.opt.sel{border-color:var(--blue);background:#16224a;box-shadow:0 0 0 1px var(--blue)}
+.opt .oi{width:44px;height:44px;border-radius:12px;background:var(--card2);display:grid;place-items:center;font-size:1.25rem;flex-shrink:0}
+.opt b{display:block}.opt p{font-size:.78rem;color:var(--gray);margin-top:2px}
+.chat-box{background:var(--card);border:1px solid var(--border);border-radius:16px;height:420px;display:flex;flex-direction:column;overflow:hidden}
+.chat-log{flex:1;overflow-y:auto;padding:16px}
+.msg{max-width:85%;padding:11px 15px;border-radius:14px;margin-bottom:10px;font-size:.9rem;line-height:1.7;animation:fade .3s}
+.msg.ai{background:var(--card2);border:1px solid var(--border)}
+.msg.me{background:var(--blue);margin-right:auto;border-bottom-left-radius:4px}
+.chat-input{display:flex;gap:8px;padding:12px;border-top:1px solid var(--border)}
+.chat-input input{flex:1;margin:0}
+.chip{background:var(--card2);border:1px solid var(--border);color:var(--text);border-radius:99px;padding:6px 14px;font-size:.78rem;cursor:pointer;margin:3px}
+.chip:hover{border-color:var(--blue)}
+.list-item{display:flex;justify-content:space-between;align-items:center;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:13px 16px;margin-bottom:10px;font-size:.88rem;gap:10px}
+.pill{font-size:.7rem;padding:3px 12px;border-radius:99px;font-weight:700;white-space:nowrap}
+.pill.ok{background:#143d33;color:var(--green)}.pill.no{background:#3d2f14;color:var(--gold)}
+.bar-row{margin-bottom:12px}
+.bar-row .lbl{display:flex;justify-content:space-between;font-size:.83rem;margin-bottom:5px}
+.track{height:8px;background:#0f1a30;border-radius:99px;overflow:hidden}
+.fill{height:100%;border-radius:99px;width:0;transition:width 1s}
+.weekday{background:var(--card2);border:1px solid var(--border);border-radius:10px;padding:6px 0;text-align:center;font-size:.75rem;color:var(--gray);cursor:pointer}
+.weekday.on{background:var(--blue);color:#fff;border-color:var(--blue)}
+footer{padding:24px 5% 100px;text-align:center;color:var(--gray);font-size:.8rem}
+.toast{position:fixed;bottom:90px;right:50%;transform:translateX(50%);background:var(--card2);border:1px solid var(--blue);border-radius:12px;padding:12px 22px;font-size:.88rem;z-index:300;display:none;max-width:90%}
+.video-ph{background:#0f1a30;border:1px dashed var(--border);border-radius:12px;padding:26px 16px;text-align:center;color:var(--gray);margin-top:12px}
+.video-frame iframe{width:100%;aspect-ratio:16/9;border:none;border-radius:12px;margin-top:12px}
+.hidden{display:none!important}
+.adm-crumb{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:14px}
+.adm-crumb button{background:var(--card2);border:1px solid var(--border);color:var(--gray);border-radius:99px;padding:6px 16px;font-size:.82rem;cursor:pointer}
+.adm-crumb button.on{background:var(--blue);color:#fff;border-color:var(--blue)}
+.sess-edit{background:#0f1a30;border:1px solid var(--border);border-radius:12px;padding:14px;margin-bottom:12px}
+</style>
+</head>
+<body>
+
+<!-- LOCK -->
+<div id="lock">
+  <div class="lock-box">
+    <div class="lock-icon">🔒</div>
+    <div class="logo-big">Study with <span>Kamy</span></div>
+    <p>منصة خاصة بالمشتركين في برنامج مراجعة البكالوريا الجزائرية.<br>أدخل رمز التفعيل الذي حصلت عليه.</p>
+    <input id="codeInput" placeholder="••••••••">
+    <button class="btn" style="width:100%" onclick="tryUnlock()">دخول 🚀</button>
+    <div class="lock-err" id="lockErr"></div>
+    <p style="margin-top:14px;font-size:.8rem">💬 للاشتراك: <a href="https://wa.me/213000000000" target="_blank" style="color:var(--blue)">تواصل مع Kamy</a></p>
+  </div>
+</div>
+
+<!-- Onboarding -->
+<div id="onboarding" class="hidden" style="padding:30px 5%;max-width:520px;margin:0 auto">
+  <div class="ob-step" data-s="1">
+    <div class="sec-title"><span class="bar"></span> شنو سميتك؟ 🙋</div>
+    <input class="inp" id="obName" placeholder="الاسم واللقب">
+    <button class="btn" style="width:100%" onclick="obGo()">متابعة</button>
+  </div>
+  <div class="ob-step" data-s="2" style="display:none">
+    <div class="sec-title"><span class="bar"></span> اختار شعبتك 📚</div>
+    <div id="obBranches"></div>
+    <button class="btn green" style="width:100%" onclick="obFinish()">🚀 ابدأ البرنامج</button>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app" class="hidden">
+<header>
+  <div class="logo" onclick="show('dashboard')"><span class="icon">🎓</span> Study with <em>Kamy</em></div>
+  <div class="h-user">
+    <span class="h-xp">⭐ <span id="hXp">0</span></span>
+    <div class="avatar" id="hAvatar">ك</div>
+  </div>
+</header>
+
+<!-- Dashboard -->
+<div class="view active" id="v-dashboard">
+  <div class="welcome">
+    <h2>أهلاً <span id="wName">بيك</span> 👋</h2>
+    <div class="mot" id="wMot"></div>
+    <div class="countdown" id="cd"></div>
+  </div>
+  <div class="stat-grid">
+    <div class="stat"><div class="v streak-v" id="sStreak">0 🔥</div><div class="l">أيام متتالية</div></div>
+    <div class="stat"><div class="v prog-v" id="sProg">0%</div><div class="l">إنجاز البرنامج</div></div>
+    <div class="stat"><div class="v xp-v" id="sXp">0</div><div class="l">نقاط الخبرة</div></div>
+    <div class="stat"><div class="v" id="sDay">—</div><div class="l">اليوم الدراسي</div></div>
+  </div>
+  <div class="sec-title"><span class="bar"></span> ✅ مهام اليوم</div>
+  <div id="todayTasks"></div>
+</div>
+
+<!-- Week -->
+<div class="view" id="v-week">
+  <div class="sec-title"><span class="bar"></span> 📅 Weekly Tasks</div>
+  <div style="display:flex;gap:6px;margin-bottom:16px;flex-wrap:wrap" id="weekNav"></div>
+  <div id="weekDays"></div>
+</div>
+
+<!-- Task detail -->
+<div class="view" id="v-task">
+  <div style="display:flex;align-items:center;gap:12px;margin-bottom:18px">
+    <button class="btn ghost sm" onclick="show('dashboard')">→ رجوع</button>
+    <div><b id="tTitle"></b><div class="muted" id="tMeta"></div></div>
+  </div>
+  <div class="card">
+    <span class="day-tag" id="tTag"></span>
+    <ul class="pts" id="tPts"></ul>
+    <div id="tVideo"><div class="video-ph">🎬 فيديو الدرس — يُضاف من لوحة تحكم Kamy</div></div>
+    <div class="video-ph">📝 تطبيق Bac جزائري مرتبط بهذا الدرس — قريباً</div>
+    <button class="btn green" style="width:100%;padding:13px;margin-top:14px" id="tDoneBtn" onclick="taskDone()">✔ تم — أنهيت المهمة</button>
+    <button class="btn ghost" style="width:100%;margin-top:8px" onclick="askReview()">🔁 ما فهمتش — راجع هذا الدرس</button>
+    <button class="btn ghost" style="width:100%;margin-top:8px" onclick="show('ask')">❓ اطرح سؤالاً خاصاً على Kamy</button>
+  </div>
+</div>
+
+<!-- Review -->
+<div class="view" id="v-review">
+  <div class="sec-title"><span class="bar"></span> 🔁 دروس للمراجعة</div>
+  <p class="muted" style="margin-bottom:14px">الدروس اللي قلتي "ما فهمتش" عليهم:</p>
+  <div id="reviewList"></div>
+</div>
+
+<!-- Ask -->
+<div class="view" id="v-ask">
+  <div class="sec-title"><span class="bar"></span> ❓ سؤال خاص (Private)</div>
+  <p class="muted" style="margin-bottom:14px">سؤالك يوصل لKamy فقط — ماشي visible للتلاميذ الآخرين.</p>
+  <div class="card">
+    <input class="inp" id="askTitle" placeholder="عنوان السؤال">
+    <textarea class="inp" id="askText" placeholder="اكتب سؤالك بالتفصيل..."></textarea>
+    <button class="btn" style="width:100%" onclick="sendAsk()">📩 إرسال إلى Kamy</button>
+  </div>
+  <div id="myAsks" style="margin-top:18px"></div>
+</div>
+
+<!-- Stats -->
+<div class="view" id="v-stats">
+  <div class="sec-title"><span class="bar"></span> 📊 تقدمي</div>
+  <div class="stat-grid">
+    <div class="stat"><div class="v" style="color:var(--blue)" id="stDone">0</div><div class="l">مهام منجزة</div></div>
+    <div class="stat"><div class="v prog-v" id="stPct">0%</div><div class="l">نسبة الإنجاز</div></div>
+    <div class="stat"><div class="v streak-v" id="stStreak">0</div><div class="l">أيام متتالية</div></div>
+    <div class="stat"><div class="v xp-v" id="stXp">0</div><div class="l">XP</div></div>
+  </div>
+  <div class="card"><h4 style="margin-bottom:14px">الإنجاز حسب المادة</h4><div id="stBars"></div></div>
+</div>
+
+<!-- AI -->
+<div class="view" id="v-ai">
+  <div class="sec-title"><span class="bar"></span> 🤖 المساعد الذكي</div>
+  <div class="chat-box">
+    <div class="chat-log" id="chatLog"></div>
+    <div style="padding:0 12px 8px">
+      <button class="chip" onclick="askAI('ما أهم شيء في درس اليوم؟')">أهم نقاط درس اليوم ⭐</button>
+      <button class="chip" onclick="askAI('ما فهمتش')">ما فهمتش 🔄</button>
+      <button class="chip" onclick="askAI('أعطني سؤالاً مشابهاً')">سؤال مشابه 📝</button>
+      <button class="chip" onclick="askAI('نصيحة للباك')">نصيحة 🎯</button>
+      <button class="chip" onclick="askAI('حلل تقدمي')">حلل تقدمي 📈</button>
+    </div>
+    <div class="chat-input">
+      <input class="inp" id="aiInput" placeholder="اسأل عن الدرس..." onkeydown="if(event.key==='Enter')askAI()">
+      <button class="btn" onclick="askAI()">إرسال</button>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== ADMIN ==================== -->
+<div class="view" id="v-admin">
+  <div class="sec-title"><span class="bar"></span> 🛠️ لوحة تحكم Kamy</div>
+  <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px">
+    <button class="btn sm" id="ab1" onclick="adminTab('codes')">🔑 الرموز</button>
+    <button class="btn sm ghost" id="ab2" onclick="adminTab('programs')">📚 البرامج</button>
+    <button class="btn sm ghost" id="ab3" onclick="adminTab('students')">👥 الطلبة</button>
+    <button class="btn sm ghost" id="ab4" onclick="adminTab('asks')">❓ الأسئلة</button>
+    <button class="btn sm ghost" id="ab5" onclick="adminTab('review')">🔁 المراجعة</button>
+  </div>
+
+  <!-- Codes -->
+  <div id="ad-codes"><div class="card">
+    <h4 style="margin-bottom:12px">➕ توليد رمز تفعيل جديد</h4>
+    <button class="btn green sm" onclick="genCode()">توليد رمز</button>
+    <div id="codeList" style="margin-top:12px"></div>
+  </div></div>
+
+  <!-- Programs (يدوي بلا كود!) -->
+  <div id="ad-programs" class="hidden">
+    <!-- level: branch -->
+    <div id="pr-level-branch">
+      <div class="card" style="margin-bottom:14px">
+        <h4 style="margin-bottom:12px">➕ إضافة شعبة جديدة</h4>
+        <div style="display:flex;gap:8px">
+          <input class="inp" id="nbName" placeholder="اسم الشعبة (مثال: رياضيات)" style="margin:0;flex:1">
+          <button class="btn sm green" onclick="addBranch()">إضافة</button>
+        </div>
+      </div>
+      <p class="muted" style="margin-bottom:10px">اختار شعبة باش تدير برنامجها:</p>
+      <div id="branchList"></div>
+    </div>
+    <!-- level: months -->
+    <div id="pr-level-months" class="hidden">
+      <div class="adm-crumb">
+        <button onclick="prGo('branch')">← كل الشعب</button>
+        <b id="prBranchName" style="color:var(--blue)"></b>
+      </div>
+      <div class="card" style="margin-bottom:14px">
+        <h4 style="margin-bottom:12px">➕ إضافة شهر</h4>
+        <div style="display:flex;gap:8px">
+          <input class="inp" id="nmName" placeholder="اسم الشهر (مثال: الشهر الأول)" style="margin:0;flex:1">
+          <button class="btn sm green" onclick="addMonth()">إضافة</button>
+        </div>
+      </div>
+      <div id="monthList"></div>
+    </div>
+    <!-- level: weeks -->
+    <div id="pr-level-weeks" class="hidden">
+      <div class="adm-crumb">
+        <button onclick="prGo('branch')">← الشعب</button>
+        <button onclick="prGo('months')">← الشهور</button>
+        <b id="prMonthName" style="color:var(--blue)"></b>
+      </div>
+      <div class="card" style="margin-bottom:14px">
+        <button class="btn sm green" onclick="addWeek()">➕ إضافة أسبوع</button>
+      </div>
+      <div id="weekList"></div>
+    </div>
+    <!-- level: days -->
+    <div id="pr-level-days" class="hidden">
+      <div class="adm-crumb">
+        <button onclick="prGo('branch')">← الشعب</button>
+        <button onclick="prGo('months')">← الشهور</button>
+        <button onclick="prGo('weeks')">← الأسابيع</button>
+        <b id="prWeekName" style="color:var(--blue)"></b>
+      </div>
+      <div class="card" style="margin-bottom:14px">
+        <button class="btn sm green" onclick="addDay()">➕ إضافة يوم</button>
+      </div>
+      <div id="dayList"></div>
+    </div>
+    <!-- level: day editor -->
+    <div id="pr-level-dayedit" class="hidden">
+      <div class="adm-crumb">
+        <button onclick="prGo('branch')">← الشعب</button>
+        <button onclick="prGo('months')">← الشهور</button>
+        <button onclick="prGo('weeks')">← الأسابيع</button>
+        <button onclick="prGo('days')">← الأيام</button>
+        <b id="prDayName" style="color:var(--blue)"></b>
+      </div>
+      <div id="dayEditor"></div>
+    </div>
+  </div>
+
+  <div id="ad-students" class="hidden"><div class="card"><div id="stuList"></div></div></div>
+  <div id="ad-asks" class="hidden"><div class="card"><div id="askList"></div></div></div>
+  <div id="ad-review" class="hidden"><div class="card"><div id="revAdmList"></div></div></div>
+</div>
+
+<nav id="bottomNav">
+  <a data-v="dashboard" class="on" onclick="show('dashboard')"><span class="i">🏠</span>الرئيسية</a>
+  <a data-v="week" onclick="show('week')"><span class="i">📅</span>الأسبوع</a>
+  <a data-v="review" onclick="show('review')"><span class="i">🔁</span>مراجعة</a>
+  <a data-v="ask" onclick="show('ask')"><span class="i">❓</span>سؤال</a>
+  <a data-v="stats" onclick="show('stats')"><span class="i">📊</span>تقدمي</a>
+  <a data-v="ai" onclick="show('ai')"><span class="i">🤖</span>المساعد</a>
+</nav>
+</div>
+
+<footer>Study with Kamy 💙 — برنامج مراجعة منظم للبكالوريا الجزائرية</footer>
+<div class="toast" id="toast"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+<script>
+/* ==================== CONFIG ==================== */
+const BAC_DATE=new Date('2027-06-06T08:00:00');
+let START_DATE=new Date(store_get('swk_start','2026-10-19'));
+function store_get(k,d){try{const v=localStorage.getItem(k);return v!==null?JSON.parse(v):d}catch(e){return d}}
+/* >>> ضع هنا بيانات مشروع Supabase (Project Settings ← API) <<< */
+const SUPA_URL='https://pxvorijxptromefxxohm.supabase.co',SUPA_KEY='sb_publishable_47eLlIRNhCpNNvIndSp06Q_i7-6hI7v';
+const sb=(SUPA_URL.startsWith('https://')&&window.supabase)?window.supabase.createClient(SUPA_URL,SUPA_KEY):null;
+async function ensureSession(){const {data:{session}}=await sb.auth.getSession();if(!session){const {error}=await sb.auth.signInAnonymously();if(error)throw error;}}
+const store={get:store_get,set:(k,v)=>localStorage.setItem(k,JSON.stringify(v))};
+const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+/* ==================== البرامج ==================== */
+const D=(amS,amT,pmS,pmT,pts,video)=>({am:{s:amS,t:amT},pm:{s:pmS,t:pmT,pts:pts||[],video:video||''}});
+const PROG_DEFAULT={
+'علوم تجريبية':{months:[
+{n:'الشهر الأول',weeks:[
+ {days:[
+  D('العلوم الإسلامية','العقيدة وأثرها على الفرد والمجتمع — الجزء 1','علوم الطبيعة والحياة','تركيب البروتين',['العلاقة بين المعلومة الوراثية وتركيب البروتين','مراحل تشكل الـ ARNm','الترجمة على مستوى الريبوزومات','دور الـ ARNt والأحماض الأمينية','مراحل تركيب السلسلة الببتيدية','تطبيقات مدمجة على الوثائق والتسلسل النكليوتيدي']),
+  D('العلوم الإسلامية','العقيدة — الجزء 2','علوم الطبيعة والحياة','العلاقة بين بنية البروتين ووظيفته',['مستويات البنية الفراغية للبروتين','تسلسل الأحماض الأمينية والبنية النهائية','دور البنية الفراغية في تحديد الوظيفة','تأثير تغير البنية في النشاط البروتيني','تحليل تجارب ووثائق حول البروتينات']),
+  D('التاريخ','بروز الصراع وتشكل العالم — الجزء 1 + مصطلحات','الفيزياء','المتابعة الزمنية لتحول كيميائي — الجزء 1',['كتابة المعادلة الكيميائية وموازنتها','حساب كميات المادة الابتدائية','إنشاء جدول تقدم التفاعل','تحديد المتفاعل المحدد والتقدم الأعظمي','حساب الحصيلة النهائية للتحول','تطبيقات مدمجة على جدول التقدم']),
+  D('التاريخ','بروز الصراع وتشكل العالم — الجزء 3 + مصطلحات','الفيزياء','المتابعة الزمنية — الجزء 2',['طرق المتابعة التجريبية للتحول','استغلال منحنيات التقدم أو التركيز بدلالة الزمن','تعريف سرعة التفاعل وحسابها','العوامل الحركية المؤثرة في سرعة التفاعل','زمن نصف التفاعل واستخراجه بيانيًا','تمارين تطبيقية على المنحنيات']),
+  D('التاريخ','بروز الصراع وتشكل العالم + مصطلحات','الفيزياء','استكمال وحدة المتابعة الزمنية',['تعميق استغلال النتائج التجريبية','الربط بين التقدم والتركيز والسرعة','تحديد السرعة اللحظية انطلاقًا من المماس','دراسة تأثير تغير الشروط التجريبية','تطبيقات مدمجة بأفكار البكالوريا وتصحيح الأخطاء']),
+  D('التاريخ','إشكالية التقدم والتخلف + مصطلحات','الرياضيات','النهايات',['النهايات عند نقطة وعند المالانهاية','النهايات المنتهية وغير المنتهية','النهايات عند أطراف مجال التعريف','العمليات على النهايات وحالات عدم التعيين','طرق رفع حالات عدم التعيين','المستقيمات المقاربة الأفقية والعمودية والمائلة']),
+  D('الجغرافيا','المبادلات والتنقلات في العالم — الجزء 1 + مصطلحات','الرياضيات','الاستمرارية',['الاستمرارية عند نقطة وعلى مجال','العلاقة بين الاستمرارية وقابلية الاشتقاق','مبرهنة القيم المتوسطة','إثبات وجود حل لمعادلة','تحديد عدد الحلول باستعمال جدول التغيرات','تطبيقات على النهايات والاستمرارية'])]},
+ {days:[
+  D('العلوم الإسلامية','وسائل تثبيت العقيدة — الجزء 1','علوم الطبيعة والحياة','النشاط الإنزيمي',['مفهوم الإنزيم والمحفز الحيوي','الموقع الفعال والمعقد إنزيم-ركيزة','نوعية الإنزيم تجاه الركيزة','تأثير درجة الحرارة ودرجة الحموضة','تأثير تركيز الركيزة والإنزيم','تحليل النتائج التجريبية والمنحنيات']),
+  D('العلوم الإسلامية','وسائل تثبيت العقيدة — الجزء 2','علوم الطبيعة والحياة','تمارين تركيب البروتين والإنزيمات',['تحليل وثائق التعبير الجيني','الربط بين البنية الفراغية والوظيفة','تفسير نتائج تجارب النشاط الإنزيمي','استغلال الجداول والمنحنيات','منهجية بناء إجابة علمية دقيقة']),
+  D('التاريخ','التعايش السلمي + مصطلحات وشخصيات','الكيمياء','الأكسدة والإرجاع — الجزء الأول',['تعريف المؤكسد والمرجع','تحديد أزواج Ox/Red','كتابة المعادلات النصفية الإلكترونية','موازنة معادلات الأكسدة والإرجاع','تطبيق جدول التقدم وحساب كميات المادة']),
+  D('الجغرافيا','حركة عدم الانحياز + مصطلحات وشخصيات','الكيمياء','المعايرة — الجزء الثاني',['مبدأ المعايرة الكيميائية','تحديد المتفاعل المعاير والمتفاعل المدروس','العلاقات بين كميات المادة عند التكافؤ','حساب نقطة التكافؤ','استغلال النتائج التجريبية']),
+  D('الجغرافيا','المبادلات والتنقلات — الجزء 2','الكيمياء','استكمال الأكسدة والإرجاع والمعايرة',['الربط بين المعادلة وجدول التقدم','حساب التركيز وكمية المادة في مسائل المعايرة','تحديد نقطة التكافؤ من المعطيات','تطبيقات مدمجة تجمع الوحدتين']),
+  D('الجغرافيا','أمريكا + مصطلحات','الرياضيات','الاشتقاقية',['تعريف المشتقة ومعدل التغير','التفسير الهندسي والمماس','قواعد الاشتقاق','مشتقات مركبة','حساب المشتقة وتحديد إشارتها']),
+  D('الجغرافيا','الاتحاد الأوروبي + مصطلحات','الرياضيات','دراسة الدوال',['حساب النهايات الضرورية','تحديد إشارة المشتقة','إنشاء جدول التغيرات','تحديد القيم الحدية','دراسة المقاربات ورسم المنحنى'])]},
+ {days:[
+  D('العلوم الإسلامية','اليهودية','علوم الطبيعة والحياة','الذات واللاذات',['محددات الهوية البيولوجية','الواسمات الغشائية والتعرف على الذات','مفهوم المستضد','التمييز بين الذات واللاذات باستغلال الوثائق']),
+  D('العلوم الإسلامية','النصرانية','علوم الطبيعة والحياة','الاستجابة المناعية الخلطية',['التعرف على المستضد','دور اللمفاويات B','الانتقاء والتكاثر النسيلي','الخلايا البلازمية وخلايا الذاكرة','تحليل الوثائق التجريبية']),
+  D('العلوم الإسلامية','الإسلام','الفيزياء','السقوط الشاقولي — الجزء الأول',['اختيار المرجع والمحاور','دراسة السقوط الحر','تحديد القوى المؤثرة على الجسم','تطبيق القانون الثاني لنيوتن','حساب زمن السقوط والارتفاع والسرعة']),
+  D('الجغرافيا','النظام الدولي الجديد — الجزء 1 + مصطلحات','الفيزياء','السقوط الشاقولي — الجزء الثاني',['نمذجة قوة مقاومة الهواء','إنشاء المعادلة التفاضلية للحركة','النظام الانتقالي والنظام الدائم','السرعة الحدية','منحنيات السرعة والتسارع'])]},
+ {days:[
+  D('العلوم الإسلامية','مقاصد الشريعة','علوم الطبيعة والحياة','الاستجابة المناعية الخلطية (التائية)',['دور اللمفاويات التائية','الانتقاء والتكاثر النسيلي','الخلايا الفعالة وخلايا الذاكرة','تحليل الوثائق الخاصة بالاستجابة الخلوية']),
+  D('العلوم الإسلامية','حجة الوداع','علوم الطبيعة والحياة','التنفس الخلوي والحصيلة الطاقوية',['التنفس والتخمر وشروط حدوثهما','مقارنة التنفس الخلوي والتخمر','حصيلة ATP في المسارات المدروسة','مقارنة مردود تحويل الطاقة','تطبيقات مدمجة حول الطاقة في الخلية']),
+  D('العلوم الإسلامية','القصاص','الفيزياء','الحركة على المستوى — الجزء الأول',['اختيار المرجع والمحاور','القوى المؤثرة على الجسم','القانون الثاني لنيوتن','الحركة الأفقية والمائلة','تأثير الاحتكاك','حساب التسارع والسرعة والمسافة']),
+  D('العلوم الإسلامية','التعزير','الفيزياء','حركة القذيفة — الجزء الثاني',['تحليل الحركة إلى مركبتين أفقية وشاقولية','المعادلات الزمنية','معادلة المسار','زمن الحركة والمدى الأفقي','الارتفاع الأقصى والمدى المختلف'])]}]},
+{n:'الشهر الثاني',weeks:[
+ {days:[
+  D('العلوم الإسلامية','المساواة','علوم الطبيعة والحياة','النقل المشبكي وكمون الراحة',['بنية المشبك العصبي ومكوناته','انتقال الرسالة العصبية على مستوى المشبك','الوسائط الكيميائية والمستقبلات الغشائية','كمون الراحة وتوزيع الشوارد','استغلال الرسومات والوثائق التجريبية']),
+  D('العلوم الإسلامية','الصحة الجسمية والنفسية','علوم الطبيعة والحياة','كمون العمل والإدماج العصبي وتأثير المخدرات',['مراحل كمون العمل','تغير نفاذية الغشاء أثناء التنبيه','الإدماج العصبي والرسائل المثبطة','تأثير المخدرات في النقل المشبكي','تحليل المنحنيات والتجارب']),
+  D('العلوم الإسلامية','الإجماع','الفيزياء','حركة الكواكب والأقمار الاصطناعية — الجزء 1',['قانون التجاذب العام لنيوتن','القوى بين الأجرام','الحركة الدائرية المنتظمة','التسارع المركزي وعلاقته بالسرعة ونصف القطر']),
+  D('العلوم الإسلامية','التعزير','الفيزياء','حركة الكواكب — الجزء 2',['سرعة الكوكب أو القمر الاصطناعي','الدور ونصف قطر المدار','الارتفاع عن سطح الأرض','قوانين كبلر حسب البرنامج']),
+  D('العلوم الإسلامية','المصالح المرسلة','الفيزياء','استكمال حركة الكواكب والأقمار الاصطناعية',['التجاذب والتسارع المركزي','العلاقات الرياضية للحركة المدارية','مسائل الدور والسرعة والارتفاع','تطبيقات بأفكار البكالوريا']),
+  D('التاريخ','استعادة السيادة الوطنية — الجزء 1 + مصطلحات','الرياضيات','المتتاليات العددية — الجزء 1',['تعريف المتتالية وطرق تعريفها','المتتاليات الحسابية والهندسية','الحد العام','حساب الحدود','دراسة اتجاه التغير']),
+  D('التاريخ','استعادة السيادة الوطنية + مصطلحات','الرياضيات','المتتاليات — الجزء 2',['العلاقة التراجعية','إثبات خصائص بالاستقراء','الرتابة والحصر','النهايات وتقارب المتتاليات'])]},
+ {days:[
+  D('العلوم الإسلامية','القيم','علوم الطبيعة والحياة','تطبيقات شاملة في المناعة',['الربط بين الاستجابة الخلطية والخلوية','تحليل نتائج التجارب المناعية','تفسير دور الخلايا والأجسام المضادة','استغلال الوثائق العلمية المركبة','منهجية الإجابة العلمية في البكالوريا']),
+  D('العلوم الإسلامية','الوقف','علوم الطبيعة والحياة','تطبيقات شاملة في الاتصال العصبي',['الربط بين كمون الراحة وكمون العمل','تحليل النقل المشبكي','تأثير المواد الكيميائية والمخدرات','الإدماج العصبي من الوثائق','تطبيق شامل مع تصحيح منهجي']),
+  D('العلوم الإسلامية','الميراث — الجزء 1','الفيزياء','دائرة RC — المكثفة وشحنها',['بنية المكثفة وخصائصها','العلاقة بين الشحنة والتوتر','سلوك المكثفة أثناء الشحن','شدة التيار والتوتر في الدارة']),
+  D('العلوم الإسلامية','الميراث — الجزء 2','الفيزياء','دائرة RC — التفريغ والثابت الزمني',['تفريغ المكثفة عبر مقاومة','المعادلة التفاضلية','تغير الشحنة والتوتر مع الزمن','الثابت الزمني وتفسيره','المنحنيات والمماسات']),
+  D('العلوم الإسلامية','النسب','الفيزياء','استكمال دائرة RC',['مقارنة الشحن والتفريغ','تأثير R وC على الثابت الزمني','استخراج المعلمات من المنحنيات','حساب الطاقة المخزنة','تطبيقات مدمجة على دائرة RC']),
+  D('العلوم الإسلامية','التبني','الرياضيات','تعميق دراسة الدوال',['النهايات والاشتقاق','اتجاه التغير والقيم الحدية','المقاربات','جدول التغيرات','الربط بين المعطيات الجبرية والبيانية']),
+  D('العلوم الإسلامية','الكفالة','الرياضيات','الدوال المركبة',['دوال أسية ولوغاريتمية','حساب النهايات والمشتقات','حل المعادلات والمتراجحات','جدول التغيرات','تطبيقات شاملة مع التصحيح'])]}]},
+{n:'الشهر الثالث',weeks:[
+ {days:[
+  D('العلوم الإسلامية','بيع التقسيط','علوم الطبيعة والحياة','تحويل الطاقة الضوئية',['مقرر التركيب الضوئي والبنيات المتدخلة','شروط حدوث التركيب الضوئي','دور الضوء واليخضور','التحويل إلى طاقة كيميائية','تجارب الكشف عن الشروط']),
+  D('العلوم الإسلامية','بيع المرابحة','علوم الطبيعة والحياة','آليات تحويل الطاقة الكيميائية إلى ATP',['مفهوم ATP ودوره في الخلية','المادة العضوية والطاقة','آليات إنتاج ATP حسب المسار المدروس','الأغشية والتدرج البروتوني','الوثائق التجريبية لإنتاج الطاقة']),
+  D('العلوم الإسلامية','بيع الصرف','الفيزياء','دائرة RL — الوشيعة والتحريض الذاتي',['بنية الوشيعة وخصائصها','التحريض الذاتي','التوتر بين طرفي الوشيعة','تأثير تغير شدة التيار']),
+  D('العلوم الإسلامية','الحرية الشخصية','الفيزياء','دائرة RL — إنشاء التيار وقطعه',['المعادلة التفاضلية لشدة التيار','النظام الانتقالي والنظام الدائم','الثابت الزمني لدائرة RL','منحنيات شدة التيار والتوتر','قوانين الدارة الكهربائية']),
+  D('العلوم الإسلامية','النسيب','الفيزياء','استكمال دائرة RL',['الطاقة المغناطيسية المخزنة في الوشيعة','خصائص الوشيعة والمقاومة','الثابت الزمني من المنحنيات','مقارنة سلوك RC وRL','تطبيقات على الدارتين']),
+  D('العلوم الإسلامية','التبني','الرياضيات','تعميق دراسة الدوال',['النهايات والاشتقاق','اتجاه التغير والقيم الحدية','المقاربات','جدول التغيرات','الربط الجبري البياني']),
+  D('العلوم الإسلامية','الكفالة','الرياضيات','الدوال المركبة',['الدوال الأسية واللوغاريتمية','النهايات والمشتقات','المعادلات والمتراجحات','جدول التغيرات','تطبيقات شاملة'])]},
+ {days:[
+  D('العلوم الإسلامية','بيع التقسيط — الجزء 2','علوم الطبيعة والحياة','تحويل الطاقة الضوئية — تطبيقات شاملة',['تحليل وثائق التركيب الضوئي','تفسير التجارب المبرهنة على الشروط','ربط العوامل المؤثرة بالنتائج','منهجية إجابة شاملة']),
+  D('العلوم الإسلامية','بيع المرابحة — الجزء 2','علوم الطبيعة والحياة','ATP — تطبيقات شاملة',['تحليل منحنيات إنتاج الطاقة','مقارنة المسارات الأيضية','تفسير دور الأغشية','تطبيقات مركبة']),
+  D('العلوم الإسلامية','بيع الصرف — الجزء 2','الفيزياء','تحويل الطاقة الكيميائية — تطبيقات',['تطبيقات على إنتاج ATP','تحليل الوثائق التجريبية','حسابات الطاقة','منهجية الإجابة']),
+  D('العلوم الإسلامية','الحرية الشخصية — الجزء 2','الفيزياء','تطبيقات شاملة في تحويل الطاقة',['مسائل تجمع الطاقة الضوئية والكيميائية','تحليل مقارن بين المسارات','تطبيقات بكالوريا سابقة']),
+  D('التاريخ','مصطلحات تاريخ','الفيزياء','استكمال التحولات النووية',['قانون التناقص الإشعاعي','النشاط ونصف العمر','الطاقة المحررة في التحولات','حسابات نووية تطبيقية']),
+  D('التاريخ','مصطلحات تاريخ','الرياضيات','استكمال المتتاليات العددية',['مراجعة طرق التعريف','الرتابة والحصر','إثبات خصائص المتتالية','تطبيقات على المتتاليات التراجعية']),
+  D('التاريخ','مصطلحات تاريخ','الرياضيات','استكمال الاحتمالات',['المتغيرات العشوائية المتقطعة','حساب الاحتمالات الشرطية','قانون الاحتمال والأمل الرياضي','تطبيقات على مسائل البكالوريا'])]},
+ {days:[
+  D('الجغرافيا','مصطلحات جغرافيا','علوم الطبيعة والحياة','مبدأ البنية الداخلية والظواهر المرتبطة بالمظهر',['بنية الظهيرة المحيطية','خصائص المناطق المتباعدة','تشكل القشرة المحيطية','العلاقة بين الظهيرة والنشاط البركاني والزلزالي','الوثائق والرسومات التفسيرية']),
+  D('الجغرافيا','مصطلحات جغرافيا','علوم الطبيعة والحياة','البنية الداخلية للكرة الأرضية',['القشرة والوشاح والنواة','التمييز بين الخصائص الفيزيائية والكيميائية للطبقات','المعطيات الزلزالية في تحديد البنية الداخلية','الرسومات الجيولوجية'])]},
+ {days:[
+  D('الجغرافيا','مصطلحات جغرافيا','الفيزياء','التحولات النووية — الجزء الأول',['بنية النواة والنظائر','الفجوات وعدم استقرار النواة','أنواع التحولات النووية','كتابة معادلات التحول النووي']),
+  D('الجغرافيا','مصطلحات جغرافيا','الفيزياء','التحولات النووية — الجزء الثاني',['النشاط الإشعاعي ووحداته','قانون التناقص الأسي','زمن نصف العمر وحساباته','الطاقة المحررة والنقص الكتلي','تطبيقات على التأريخ'])]},
+ {days:[
+  D('مراجعة إسلامية','مراجعة شاملة','علوم الطبيعة والحياة','المنهج الداخلي والظواهر المرتبطة بالمظهر + تطبيقات',['مراجعة مبدأ البنية الداخلية','تطبيقات على الوثائق الجيولوجية','تحليل الرسومات والمنحنيات']),
+  D('مراجعة إسلامية','مراجعة شاملة','اللغة العربية','الشعر التعليمي والنثر العلمي — الجزء 1',['20:00-21:00 text historique مع قواعده','21:00-22:00 ethics in business مع قواعده','فيديو قواعد الأستاذ حيحون — الجزء 1 مع تطبيق']),
+  D('مراجعة إسلامية','مراجعة شاملة','اللغة العربية','شعر المهجر',['20:00-21:00 débat d\u2019idée مع قواعده','21:00-22:00 safety and food مع قواعده','فيديو قواعد الأستاذ حيحون — الجزء 2 مع تطبيق']),
+  D('مراجعة إسلامية','مراجعة شاملة','اللغة العربية','شعر سياسي وشعر اجتماعي',['20:00-21:00 l\u2019appel مع قواعده','21:00-22:00 astronomy مع قواعده','فيديو قواعد الأستاذ حيحون — الجزء 3'])]}]}
+]},
+'رياضيات':null,'تقني رياضي':null,'تسيير واقتصاد':null,'آداب وفلسفة':null,'لغات أجنبية':null};
+let PROG=JSON.parse(JSON.stringify(PROG_DEFAULT));
+Object.keys(store.get('swk_progs',{})).forEach(b=>{PROG[b]=store.get('swk_progs',{})[b]});
+function saveProgs(){const o={};Object.keys(PROG).forEach(b=>{if(PROG[b])o[b]=PROG[b]});store.set('swk_progs',o);}
+const SUBJ_COLOR={'العلوم الإسلامية':['🕌','#143d33'],'التاريخ':['🏛️','#3d2f14'],'الجغرافيا':['🌍','#22345f'],'علوم الطبيعة والحياة':['🔬','#3d1533'],'الفيزياء':['⚡','#0e3a52'],'الكيمياء':['⚗️','#143d33'],'الرياضيات':['📐','#2a2f5e'],'اللغة العربية':['✒️','#3d1533'],'مراجعة إسلامية':['🕌','#143d33'],'الفلسفة':['🤔','#2a2f5e'],'اللغة الفرنسية':['🇫🇷','#22345f'],'اللغة الإنجليزية':['🇬🇧','#143d33'],'الاقتصاد والتسيير':['💼','#3d2f14'],'التكنولوجيا':['⚙️','#0e3a52']};
+
+/* ==================== STATE ==================== */
+let user=store.get('swk_user',null);
+let S=store.get('swk_state',{xp:0,streak:0,lastStudy:'',done:[],review:[],asks:[]});
+
+/* ==================== UNLOCK ==================== */
+async function tryUnlock(){
+  const v=document.getElementById('codeInput').value.trim().toUpperCase(),err=document.getElementById('lockErr');
+  if(!v)return;
+  if(!sb){err.textContent='⚠️ الموقع غير مربوط بقاعدة البيانات بعد';return;}
+  err.textContent='⏳ ...';
+  const {data,error}=await sb.rpc('check_code',{p_code:v});
+  if(error){err.textContent='⚠️ تعذر الاتصال، حاول مرة أخرى';return;}
+  if(!data){err.textContent='❌ رمز غير صحيح أو مستعمل';return;}
+  window._code=v;err.textContent='';
+  document.getElementById('lock').style.display='none';
+  document.getElementById('onboarding').classList.remove('hidden');buildOb();
+}
+document.getElementById('codeInput').addEventListener('keydown',e=>{if(e.key==='Enter')tryUnlock();});
+
+/* ==================== ONBOARDING ==================== */
+let obBranch=null;
+function buildOb(){
+  document.getElementById('obBranches').innerHTML=Object.keys(PROG).map(b=>
+    `<div class="opt" data-v="${esc(b)}" onclick="selB(this)"><div class="oi">${PROG[b]?'📗':'🕐'}</div><div><b>${esc(b)}</b><p>${PROG[b]?'البرنامج جاهز ✅':'البرنامج قيد التجهيز — قريباً'}</p></div></div>`).join('');
+}
+function selB(el){document.querySelectorAll('#obBranches .opt').forEach(o=>o.classList.remove('sel'));el.classList.add('sel');obBranch=el.dataset.v;}
+function obGo(){const n=document.getElementById('obName').value.trim();if(!n){alert('اكتب سميتك');return;}window._obName=n;document.querySelector('.ob-step[data-s="1"]').style.display='none';document.querySelector('.ob-step[data-s="2"]').style.display='block';}
+async function obFinish(){
+  if(!obBranch){alert('اختار شعبتك');return;}
+  try{
+    await ensureSession();
+    const {error}=await sb.rpc('redeem_code',{p_code:window._code,p_name:window._obName,p_branch:obBranch});
+    if(error)throw error;
+  }catch(e){alert('تعذر التسجيل: '+(e.message||e));return;}
+  user={name:window._obName,branch:obBranch,at:new Date().toISOString()};
+  store.set('swk_user',user);localStorage.setItem('swk_auth','1');
+  document.getElementById('onboarding').classList.add('hidden');
+  enterApp();
+}
+
+/* ==================== HELPERS ==================== */
+function flatDays(){
+  const p=PROG[user.branch];if(!p)return[];
+  const out=[];let di=0;
+  p.months.forEach((m,mi)=>m.weeks.forEach((w,wi)=>w.days.forEach((d,dyi)=>{di++;out.push({idx:di,mi,wi,dyi,day:dyi+1,month:m.n,date:addDays(START_DATE,di-1),d});})));
+  return out;
+}
+function addDays(d,n){const x=new Date(d);x.setDate(x.getDate()+n);return x;}
+function todayIdx(){
+  const diff=Math.floor((new Date().setHours(0,0,0,0)-new Date(START_DATE).setHours(0,0,0,0))/86400000)+1;
+  const total=PROG[user.branch]?flatDays().length:0;
+  return Math.min(Math.max(diff,1),Math.max(total,1));
+}
+function fmtD(d){return d.toLocaleDateString('ar-DZ',{weekday:'long',day:'numeric',month:'long'});}
+
+/* ==================== APP ==================== */
+function enterApp(){
+  document.getElementById('app').classList.remove('hidden');
+  document.getElementById('hAvatar').textContent=user.name[0];
+  document.getElementById('wName').textContent=user.name;
+  const MOTS=['النجاح هو مجموع الجهود الصغيرة المتكررة كل يوم 💪','ما كاينش مستحيل، كاين غير "مازال ما بديتش" 🚀','كل مهمة كتكملها اليوم، هي نقطة كتربحيها فالباك 🎯','الاستمرارية تغلب الحماس — ركز على اليوم ديالك فقط 📅'];
+  document.getElementById('wMot').textContent=MOTS[new Date().getDate()%MOTS.length];
+  if(!window._cdT)window._cdT=setInterval(renderCD,60000);
+  renderAll();
+}
+function show(v){
+  document.querySelectorAll('.view').forEach(x=>x.classList.remove('active'));
+  document.getElementById('v-'+v).classList.add('active');
+  document.querySelectorAll('#bottomNav a').forEach(a=>a.classList.toggle('on',a.dataset.v===v));
+  if(v==='week')renderWeek();if(v==='stats')renderStats();if(v==='review')renderReview();if(v==='ask')renderMyAsks();
+  window.scrollTo(0,0);
+}
+function toast(t){const el=document.getElementById('toast');el.textContent=t;el.style.display='block';setTimeout(()=>el.style.display='none',2600);}
+function renderAll(){renderCD();renderToday();renderStats();document.getElementById('hXp').textContent=S.xp;}
+function renderCD(){
+  const diff=BAC_DATE-new Date();
+  const d=Math.max(0,Math.floor(diff/86400000)),h=Math.max(0,Math.floor(diff/3600000)%24),m=Math.max(0,Math.floor(diff/60000)%60);
+  document.getElementById('cd').innerHTML=`<div class="cd-box"><b>${d}</b><span>يوم</span></div><div class="cd-box"><b>${h}</b><span>ساعة</span></div><div class="cd-box"><b>${m}</b><span>دقيقة</span></div>`;
+  
+}
+
+/* ---------- Today ---------- */
+function taskHTML(fd,sess,label,time){
+  const done=S.done.includes(fd.idx+label);
+  const c=SUBJ_COLOR[sess.s]||['📘','#22345f'];
+  return `<div class="task ${done?'done':''}" onclick="openTask(${fd.idx},'${label}')">
+    <div class="row"><div class="ic" style="background:${c[1]}">${c[0]}</div>
+    <div class="info"><b>${esc(sess.t)}</b><p>${esc(sess.s)}</p></div>
+    <span class="time">${time}</span><div class="check">✔</div></div></div>`;
+}
+function renderToday(){
+  const p=PROG[user.branch];
+  document.getElementById('sStreak').textContent=S.streak+' 🔥';
+  document.getElementById('sXp').textContent=S.xp;
+  if(!p||!flatDays().length){
+    document.getElementById('todayTasks').innerHTML=`<div class="card" style="text-align:center;padding:40px 20px">
+      <div style="font-size:3rem;margin-bottom:10px">🕐</div><b>برنامج ${esc(user.branch)} قيد التجهيز</b>
+      <p class="muted" style="margin-top:8px">Kamy كتجهز البرنامج ديال هاد الشعبة — غادي يتفعل قريباً.</p></div>`;
+    document.getElementById('sDay').textContent='—';document.getElementById('sProg').textContent='0%';return;
+  }
+  const days=flatDays(),ti=todayIdx(),fd=days[ti-1];
+  if(!fd){document.getElementById('todayTasks').innerHTML='<p class="muted">انتهى البرنامج! 🎉</p>';return;}
+  document.getElementById('sDay').textContent='يوم '+fd.idx;
+  const d=fd.d;
+  const doneToday=S.done.includes(fd.idx+'am')&&S.done.includes(fd.idx+'pm');
+  let html=`<p class="muted" style="margin-bottom:12px">${fmtD(fd.date)} • ${esc(fd.month)} • الأسبوع ${fd.wi+1} • DAY ${fd.day}</p>`;
+  if(new Date().setHours(0,0,0,0)<new Date(START_DATE).setHours(0,0,0,0))html=`<div class="card" style="margin-bottom:12px;border-color:var(--gold)">⏳ يبدأ البرنامج يوم ${fmtD(START_DATE)} — هذه معاينة لليوم الأول</div>`+html;
+  html+=taskHTML(fd,d.am,'am','06:00 - 07:00');
+  html+=taskHTML(fd,d.pm,'pm','18:00 - 22:00');
+  if(doneToday){
+    const nxt=days[fd.idx];
+    html+=`<div class="card" style="text-align:center;margin-top:14px;border-color:var(--green)">
+      <b style="color:var(--green)">🎉 أنجزت كل مهام اليوم!</b>
+      <p class="muted" style="margin-top:6px">${nxt?'غدا إن شاء الله: '+esc(nxt.d.am.t)+' + '+esc(nxt.d.pm.t):'انتهى البرنامج!'}</p></div>`;
+  }
+  document.getElementById('todayTasks').innerHTML=html;
+  const pct=Math.round(S.done.length/(days.length*2)*100);
+  document.getElementById('sProg').textContent=pct+'%';
+}
+
+/* ---------- Week ---------- */
+let selWeek=0,selMonth=0;
+function renderWeek(){
+  const p=PROG[user.branch];if(!p||!flatDays().length){document.getElementById('weekDays').innerHTML='<p class="muted">البرنامج قيد التجهيز.</p>';document.getElementById('weekNav').innerHTML='';return;}
+  const days=flatDays(),cur=days[todayIdx()-1]||days[0];
+  if(!window._wInit){selWeek=cur.wi;selMonth=cur.mi;window._wInit=true;}
+  document.getElementById('weekNav').innerHTML=p.months.map((m,mi)=>m.weeks.map((w,wi)=>
+    `<button class="weekday ${selWeek===wi&&selMonth===mi?'on':''}" style="flex:1;min-width:95px" onclick="selWeek=${wi};selMonth=${mi};renderWeek()">${esc(m.n.replace('الشهر ','ش '))} أ${wi+1}</button>`).join('')).join('');
+  const wdays=days.filter(x=>x.wi===selWeek&&x.mi===selMonth);
+  document.getElementById('weekDays').innerHTML=wdays.map(fd=>{
+    const doneA=S.done.includes(fd.idx+'am'),doneP=S.done.includes(fd.idx+'pm');
+    const isToday=fd.idx===todayIdx();
+    return `<div class="task" style="${isToday?'border-color:var(--blue)':''}">
+      <div class="row"><div class="info"><b>DAY ${fd.day} — ${fmtD(fd.date)}</b>${isToday?' <span class="pill ok">اليوم</span>':''}
+      <p style="margin-top:6px">${doneA?'✅':'▫️'} ${esc(fd.d.am.s)}: ${esc(fd.d.am.t)}</p>
+      <p style="margin-top:2px">${doneP?'✅':'▫️'} ${esc(fd.d.pm.s)}: ${esc(fd.d.pm.t)}</p></div></div></div>`;
+  }).join('');
+}
+
+/* ---------- Task detail ---------- */
+let curTask=null;
+function openTask(idx,label){
+  const fd=flatDays().find(x=>x.idx===idx);if(!fd)return;
+  const sess=label==='am'?fd.d.am:fd.d.pm;
+  curTask={idx,label,fd,sess};
+  document.getElementById('tTitle').textContent=sess.t;
+  document.getElementById('tMeta').textContent=`${sess.s} • ${fd.month} • الأسبوع ${fd.wi+1} • DAY ${fd.day} • ${label==='am'?'06:00-07:00':'18:00-22:00'}`;
+  document.getElementById('tTag').textContent=user.branch;
+  document.getElementById('tPts').innerHTML=(sess.pts||[]).map(p=>`<li>${esc(p)}</li>`).join('');
+  const vid=(sess.video||'').trim(),ym=vid.match(/(?:youtu\.be\/|v=|embed\/)([\w-]{11})/);
+  const vsrc=ym?'https://www.youtube.com/embed/'+ym[1]:(/^https:\/\//i.test(vid)?vid:'');
+  document.getElementById('tVideo').innerHTML=vsrc?`<div class="video-frame"><iframe src="${esc(vsrc)}" allowfullscreen></iframe></div>`:'<div class="video-ph">🎬 فيديو الدرس — يُضاف من لوحة تحكم Kamy</div>';
+  const done=S.done.includes(idx+label);
+  const b=document.getElementById('tDoneBtn');
+  b.disabled=done;b.textContent=done?'✅ تم إنجازها':'✔ تم — أنهيت المهمة';
+  show('task');
+}
+function taskDone(){
+  if(!curTask)return;
+  S.done.push(curTask.idx+curTask.label);
+  S.xp+=25;
+  const today=new Date().toDateString(),yest=new Date(Date.now()-86400000).toDateString();
+  if(S.lastStudy!==today){S.streak=S.lastStudy===yest?S.streak+1:1;S.lastStudy=today;}
+  store.set('swk_state',S);
+  toast('🎉 أحسنت! +25 XP');
+  renderAll();document.getElementById('tDoneBtn').disabled=true;document.getElementById('tDoneBtn').textContent='✅ تم إنجازها';
+}
+function askReview(){
+  if(!curTask)return;
+  S.review.push({t:curTask.sess.t,s:curTask.sess.s,d:fmtD(new Date())});
+  if(sb)sb.from('reviews').insert({title:curTask.sess.t,subject:curTask.sess.s}).then(()=>{});
+  store.set('swk_state',S);toast('🔁 سجلناها فقسم المراجعة');
+}
+function renderReview(){
+  document.getElementById('reviewList').innerHTML=S.review.length?S.review.map((r,i)=>
+    `<div class="list-item"><span>🔁 ${esc(r.t)} <span class="muted">(${esc(r.s)}) — ${esc(r.d)}</span></span>
+    <button class="btn sm ghost" onclick="S.review.splice(${i},1);store.set('swk_state',S);renderReview()">فهمتها ✔</button></div>`).join('')
+    :'<p class="muted">✅ لا دروس للمراجعة — كلشي واضح!</p>';
+}
+
+/* ---------- Ask ---------- */
+async function sendAsk(){
+  const t=document.getElementById('askTitle').value.trim(),x=document.getElementById('askText').value.trim();
+  if(!t||!x){alert('املأ العنوان والسؤال');return;}
+  try{await ensureSession();const {error}=await sb.from('asks').insert({title:t,body:x});if(error)throw error;}
+  catch(e){alert('تعذر الإرسال: '+(e.message||e));return;}
+  document.getElementById('askTitle').value='';document.getElementById('askText').value='';
+  toast('📩 وصل سؤالك لKamy — غادي تجاوبك قريباً');renderMyAsks();
+}
+async function renderMyAsks(){
+  const el=document.getElementById('myAsks');if(!sb){el.innerHTML='';return;}
+  const {data,error}=await sb.from('asks').select('*').order('created_at',{ascending:false});
+  el.innerHTML=(!error&&data&&data.length)?'<div class="sec-title" style="margin-top:6px"><span class="bar"></span> أسئلتي</div>'+data.map(a=>`<div class="card" style="margin-bottom:10px"><b>${esc(a.title)}</b><p class="muted" style="margin-top:6px">${esc(a.body)}</p><span class="pill ${a.answered?'ok':'no'}" style="margin-top:8px;display:inline-block">${a.answered?'تمت الإجابة ✅':'قيد الانتظار ⏳'}</span></div>`).join(''):'';
+}
+
+/* ---------- Stats ---------- */
+function renderStats(){
+  const total=PROG[user.branch]?flatDays().length*2:0;
+  document.getElementById('stDone').textContent=S.done.length;
+  document.getElementById('stPct').textContent=total?Math.round(S.done.length/total*100)+'%':'0%';
+  document.getElementById('stStreak').textContent=S.streak;
+  document.getElementById('stXp').textContent=S.xp;
+  const per={};
+  if(user.branch&&PROG[user.branch])flatDays().forEach(fd=>{
+    if(S.done.includes(fd.idx+'am'))per[fd.d.am.s]=(per[fd.d.am.s]||0)+1;
+    if(S.done.includes(fd.idx+'pm'))per[fd.d.pm.s]=(per[fd.d.pm.s]||0)+1;
+  });
+  document.getElementById('stBars').innerHTML=Object.keys(per).length?
+    Object.keys(per).map(s=>`<div class="bar-row"><div class="lbl"><span>${s}</span><span>${per[s]} مهمة</span></div>
+    <div class="track"><div class="fill" style="width:${Math.min(100,per[s]/14*100)}%;background:var(--blue)"></div></div></div>`).join('')
+    :'<p class="muted">ابدأ إنجاز المهام باش يظهر التحليل 📊</p>';
+}
+
+/* ---------- AI ---------- */
+function aiSay(t,me=false){const log=document.getElementById('chatLog');log.innerHTML+=`<div class="msg ${me?'me':'ai'}">${me?esc(t):t}</div>`;log.scrollTop=log.scrollHeight;}
+function askAI(preset){
+  const q=(preset||document.getElementById('aiInput').value).trim();if(!q)return;
+  document.getElementById('aiInput').value='';aiSay(q,true);
+  setTimeout(()=>{
+    const d=PROG[user.branch]?flatDays()[todayIdx()-1]:null;
+    let r;
+    if(q.includes('فهمتش')&&d){
+      r=`🔄 ما عليك غير تقلق! خلينا نعاودو ببساطة.<br><br>درس اليوم: <b>${esc(d.d.pm.t)}</b><br><br>${d.d.pm.pts.slice(0,3).map((p,i)=>`${i+1}️⃣ <b>${esc(p.split('،')[0])}</b> — فهمها وحدة بوحدة.`).join('<br>')}<br><br>💡 اقرا الملخص، شوف الفيديو، وحاول مثال بسيط قبل تمارين الباك. أي نقطة معقدة صيفطهالي فـ"سؤال خاص" ونجاوبك عليها.`;
+    }else if(q.includes('أهم')&&d){
+      r=`⭐ أهم النقاط فـ <b>${esc(d.d.pm.t)}</b>:<br>${d.d.pm.pts.map(p=>'• '+esc(p)).join('<br>')}<br><br>🎯 طبّقهم بيدك — هادي هي الطريقة الوحيدة باش تثبت المعلومة.`;
+    }else if(q.includes('سؤال')&&d){
+      r=`📝 جرب تسول نفسك:<br>• اشرح بكلامك: ${esc(d.d.pm.pts[0])}؟<br>• واش تقدر تعطي مثال تطبيقي؟<br>• كيفاش ممكن تجي فالباك؟<br><br>إلا جاوبت على الثلاثة بلا ما تشوف — راك فاهم الدرس ✅`;
+    }else if(q.includes('حلل')){
+      const total=PROG[user.branch]?flatDays().length*2:1;
+      r=`📈 تحليل تقدمك:<br>• المهام المنجزة: <b>${S.done.length}/${total}</b><br>• نسبة الإنجاز: <b>${Math.round(S.done.length/total*100)}%</b><br>• الأيام المتتالية: <b>${S.streak} 🔥</b><br>• دروس للمراجعة: <b>${S.review.length}</b><br><br>${S.done.length/total<0.3?'💪 ابدأ غير بمهمة وحدة اليوم — الاستمرارية أهم من الكمية.':'👏 مزيان! كمّل على هاد الوتيرة.'}`;
+    }else if(q.includes('نصيحة')){
+      r=`🎯 نصائح للباك الجزائري:<br>• الأفضلية دائماً لمواضيع Bac جزائرية سابقة (2020-2025)<br>• درّس بجدول: صباحاً مادة معرفية + مساءً مادة علمية<br>• كل درس → تطبيق مباشر — هادا هو الفرق بين اللي يقرا واللي يستوعب<br>• راجع أخطاءك قبل أي موضوع جديد`;
+    }else{
+      r=`أنا مساعدك الذكي 📚<br>جرّب: "أهم نقاط درس اليوم"، "ما فهمتش"، "أعطني سؤالاً مشابهاً"، "حلل تقدمي"، "نصيحة للباك"`;
+    }
+    aiSay(r);
+  },500);
+}
+
+/* ==================== ADMIN ==================== */
+document.getElementById('hAvatar').addEventListener('dblclick',async()=>{
+  if(!sb)return;
+  const email=prompt('بريد Kamy:');if(!email)return;
+  const password=prompt('كلمة السر:');if(!password)return;
+  const {error}=await sb.auth.signInWithPassword({email,password});
+  if(error){alert('بيانات الدخول غير صحيحة');return;}
+  const {data}=await sb.from('admins').select('user_id').maybeSingle();
+  if(!data){alert('هذا الحساب ليس مشرفاً');return;}
+  show('admin');adminTab('codes');
+});
+function adminTab(t){
+  ['codes','programs','students','asks','review'].forEach(x=>document.getElementById('ad-'+x).classList.toggle('hidden',x!==t));
+  const map={codes:1,programs:2,students:3,asks:4,review:5};
+  for(let i=1;i<=5;i++)document.getElementById('ab'+i).className='btn sm'+(i===map[t]?'':' ghost');
+  if(t==='programs')prGo('branch');
+  renderAdm();
+}
+async function renderAdm(){
+  const $=id=>document.getElementById(id);
+  const [c,s,a,r]=await Promise.all([
+    sb.from('codes').select('*').order('created_at',{ascending:false}),
+    sb.from('students').select('*').order('created_at',{ascending:false}),
+    sb.from('asks').select('*, students(name)').order('created_at',{ascending:false}),
+    sb.from('reviews').select('*, students(name)').order('created_at',{ascending:false})]);
+  if(c.error){toast('⚠️ سجّل الدخول كمشرف (نقر مزدوج على الصورة)');return;}
+  const nm=x=>esc(x.students&&x.students.name);
+  $('codeList').innerHTML=(c.data||[]).map(x=>`<div class="list-item"><span style="font-family:monospace;font-weight:700">${esc(x.code)}</span><span class="pill ${x.used_by?'no':'ok'}">${x.used_by?'مستعمل':'متاح'}</span></div>`).join('');
+  $('stuList').innerHTML=(s.data||[]).length?s.data.map(x=>`<div class="list-item"><span>👤 ${esc(x.name)}</span><span class="muted">${esc(x.branch)} • ${new Date(x.created_at).toLocaleDateString()}</span></div>`).join(''):'<p class="muted">لا طلبة بعد.</p>';
+  $('askList').innerHTML=(a.data||[]).length?a.data.map(x=>`<div class="list-item" style="align-items:flex-start"><div><b>${esc(x.title)}</b> <span class="muted">— ${nm(x)}</span><p class="muted" style="margin-top:4px">${esc(x.body)}</p></div>${x.answered?'<span class="pill ok">تمت الإجابة</span>':`<button class="btn sm ghost" onclick="answerAsk(${x.id})">✔ جاوبت</button>`}</div>`).join(''):'<p class="muted">لا أسئلة واردة.</p>';
+  $('revAdmList').innerHTML=(r.data||[]).length?r.data.map(x=>`<div class="list-item"><span>🔁 ${esc(x.title)} <span class="muted">(${esc(x.subject)}) — ${nm(x)}</span></span></div>`).join(''):'<p class="muted">لا طلبات مراجعة.</p>';
+}
+async function answerAsk(id){await sb.from('asks').update({answered:true}).eq('id',id);renderAdm();}
+async function genCode(){const c='KAMY-'+Math.random().toString(36).slice(2,8).toUpperCase();const {error}=await sb.from('codes').insert({code:c});if(error){toast('⚠️ '+error.message);return;}renderAdm();toast('🔑 رمز جديد: '+c);}
+
+/* ---------- Admin: Programs CRUD (بدون كود) ---------- */
+let prB=null,prM=null,prW=null,prD=null;
+function prGo(level){
+  ['branch','months','weeks','days','dayedit'].forEach(l=>document.getElementById('pr-level-'+l).classList.toggle('hidden',l!==level));
+  if(level==='branch')renderBranchAdm();
+  if(level==='months')renderMonthsAdm();
+  if(level==='weeks')renderWeeksAdm();
+  if(level==='days')renderDaysAdm();
+  if(level==='dayedit')renderDayEditor();
+}
+function renderBranchAdm(){
+  document.getElementById('branchList').innerHTML=Object.keys(PROG).map((b,i)=>
+    `<div class="list-item"><span>📗 ${esc(b)} ${PROG[b]?'':'<span class="pill no">فارغ</span>'}</span>
+    <span style="display:flex;gap:6px">
+    <button class="btn sm" onclick="prOpenBranch(${i})">فتح</button>
+    ${PROG[b]?'':`<button class="btn sm red" onclick="prDelBranch(${i})">حذف</button>`}
+    </span></div>`).join('');
+}
+function prOpenBranch(i){prB=Object.keys(PROG)[i];if(!PROG[prB])PROG[prB]={months:[]};document.getElementById('prBranchName').textContent=prB;prGo('months');}
+function prDelBranch(i){const b=Object.keys(PROG)[i];if(confirm('حذف الشعبة؟')){delete PROG[b];saveProgs();renderBranchAdm();}}
+function addBranch(){
+  const n=document.getElementById('nbName').value.trim();
+  if(!n){alert('اكتب اسم الشعبة');return;}
+  PROG[n]=PROG[n]||{months:[]};
+  saveProgs();document.getElementById('nbName').value='';renderBranchAdm();toast('✅ تمت إضافة الشعبة');
+}
+function renderMonthsAdm(){
+  document.getElementById('monthList').innerHTML=(PROG[prB].months||[]).map((m,mi)=>
+    `<div class="list-item"><span>📅 ${esc(m.n)} <span class="muted">(${(m.weeks||[]).length} أسابيع)</span></span>
+    <span style="display:flex;gap:6px">
+    <button class="btn sm" onclick="prOpenMonth(${mi})">فتح</button>
+    <button class="btn sm red" onclick="if(confirm('حذف الشهر؟')){PROG[prB].months.splice(${mi},1);saveProgs();renderMonthsAdm()}">حذف</button>
+    </span></div>`).join('')||'<p class="muted">لا أشهر — زيدي أول شهر.</p>';
+}
+function prOpenMonth(mi){prM=mi;document.getElementById('prMonthName').textContent=PROG[prB].months[mi].n;prGo('weeks');}
+function addMonth(){
+  const n=document.getElementById('nmName').value.trim();if(!n){alert('اكتب اسم الشهر');return;}
+  PROG[prB].months=PROG[prB].months||[];
+  PROG[prB].months.push({n,weeks:[]});
+  saveProgs();document.getElementById('nmName').value='';renderMonthsAdm();toast('✅ تمت إضافة الشهر');
+}
+function renderWeeksAdm(){
+  document.getElementById('weekList').innerHTML=(PROG[prB].months[prM].weeks||[]).map((w,wi)=>
+    `<div class="list-item"><span>🗓️ الأسبوع ${wi+1} <span class="muted">(${(w.days||[]).length} أيام)</span></span>
+    <span style="display:flex;gap:6px">
+    <button class="btn sm" onclick="prW=${wi};document.getElementById('prWeekName').textContent='الأسبوع ${wi+1}';prGo('days')">فتح</button>
+    <button class="btn sm red" onclick="if(confirm('حذف الأسبوع؟')){PROG[prB].months[prM].weeks.splice(${wi},1);saveProgs();renderWeeksAdm()}">حذف</button>
+    </span></div>`).join('')||'<p class="muted">لا أسابيع — زيدي أول أسبوع.</p>';
+}
+function addWeek(){PROG[prB].months[prM].weeks=PROG[prB].months[prM].weeks||[];PROG[prB].months[prM].weeks.push({days:[]});saveProgs();renderWeeksAdm();toast('✅ تمت إضافة أسبوع');}
+function renderDaysAdm(){
+  document.getElementById('dayList').innerHTML=(PROG[prB].months[prM].weeks[prW].days||[]).map((d,di)=>
+    `<div class="list-item"><span>☀️ <b>DAY ${di+1}</b> <span class="muted">${esc(d.am.s)}: ${esc(d.am.t)} | ${esc(d.pm.s)}: ${esc(d.pm.t)}</span></span>
+    <span style="display:flex;gap:6px">
+    <button class="btn sm" onclick="prD=${di};document.getElementById('prDayName').textContent='DAY ${di+1}';prGo('dayedit')">✏️ تعديل</button>
+    <button class="btn sm red" onclick="if(confirm('حذف اليوم؟')){PROG[prB].months[prM].weeks[prW].days.splice(${di},1);saveProgs();renderDaysAdm()}">حذف</button>
+    </span></div>`).join('')||'<p class="muted">لا أيام — زيدي أول يوم.</p>';
+}
+function addDay(){
+  const days=PROG[prB].months[prM].weeks[prW].days;
+  days.push({am:{s:'',t:''},pm:{s:'',t:'',pts:[],video:''}});
+  saveProgs();renderDaysAdm();toast('✅ تمت إضافة يوم — دخلي تعدليه');
+}
+function renderDayEditor(){
+  const d=PROG[prB].months[prM].weeks[prW].days[prD];
+  const sessHTML=(sess,key,label,time)=>{
+    const subjOpts=Object.keys(SUBJ_COLOR).map(s=>`<option ${sess.s===s?'selected':''}>${s}</option>`).join('');
+    return `<div class="sess-edit">
+      <b style="color:var(--blue)">${label} (${time})</b>
+      <input class="inp" style="margin-top:10px" id="ed_${key}_s" list="subjList" value="${esc(sess.s)}" placeholder="المادة">
+      <input class="inp" id="ed_${key}_t" value="${esc(sess.t)}" placeholder="عنوان الدرس">
+      <textarea class="inp" id="ed_${key}_pts" placeholder="النقاط (كل نقطة في سطر)">${esc((sess.pts||[]).join('\n'))}</textarea>
+      <input class="inp" id="ed_${key}_v" value="${esc(sess.video)}" placeholder="رابط فيديو YouTube (اختياري)" style="direction:ltr;text-align:left">
+    </div>`;
+  };
+  document.getElementById('dayEditor').innerHTML=`
+    <datalist id="subjList">${Object.keys(SUBJ_COLOR).map(s=>`<option value="${s}">`).join('')}</datalist>
+    <div class="card">
+      ${sessHTML(d.am,'am','☀️ الصباح','06:00 - 07:00')}
+      ${sessHTML(d.pm,'pm','🌙 المساء','18:00 - 22:00')}
+      <button class="btn green" style="width:100%" onclick="saveDay()">💾 حفظ اليوم</button>
+    </div>`;
+}
+function saveDay(){
+  const d=PROG[prB].months[prM].weeks[prW].days[prD];
+  ['am','pm'].forEach(k=>{
+    d[k].s=document.getElementById(`ed_${k}_s`).value.trim();
+    d[k].t=document.getElementById(`ed_${k}_t`).value.trim();
+    {
+      d[k].pts=document.getElementById('ed_'+k+'_pts').value.split('\n').map(x=>x.trim()).filter(Boolean);
+      d[k].video=document.getElementById('ed_'+k+'_v').value.trim();
+    }
+  });
+  saveProgs();toast('✅ تم الحفظ — البرنامج محدّث');renderDayEditor();
+}
+
+/* ==================== INIT ==================== */
+if(user&&PROG[user.branch]===undefined&&user.branch){/* branch deleted */}
+if(localStorage.getItem('swk_auth')==='1'&&user){document.getElementById('lock').style.display='none';enterApp();}
+</script>
+</body>
+</html>
