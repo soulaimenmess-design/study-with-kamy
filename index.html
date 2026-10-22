@@ -110,6 +110,8 @@ footer{padding:24px 5% 100px;text-align:center;color:var(--gray);font-size:.8rem
 .adm-crumb button{background:var(--card2);border:1px solid var(--border);color:var(--gray);border-radius:99px;padding:6px 16px;font-size:.82rem;cursor:pointer}
 .adm-crumb button.on{background:var(--blue);color:#fff;border-color:var(--blue)}
 .sess-edit{background:#0f1a30;border:1px solid var(--border);border-radius:12px;padding:14px;margin-bottom:12px}
+#lock{overflow-y:auto;align-items:flex-start!important}#lock .lock-box{margin:24px auto}
+#bottomNav{padding-left:2px;padding-right:2px}#bottomNav a{font-size:.66rem;min-width:0}
 </style>
 </head>
 <body>
@@ -119,11 +121,32 @@ footer{padding:24px 5% 100px;text-align:center;color:var(--gray);font-size:.8rem
   <div class="lock-box">
     <div class="lock-icon">🔒</div>
     <div class="logo-big">Study with <span>Kamy</span></div>
-    <p>منصة خاصة بالمشتركين في برنامج مراجعة البكالوريا الجزائرية.<br>أدخل رمز التفعيل الذي حصلت عليه.</p>
-    <input id="codeInput" placeholder="••••••••">
-    <button class="btn" style="width:100%" onclick="tryUnlock()">دخول 🚀</button>
+    <div id="lkForm">
+      <p>منصة خاصة بالمشتركين في برنامج مراجعة البكالوريا الجزائرية.<br>أرسل طلب اشتراكك مع وصل الدفع، وتتم مراجعته.</p>
+      <input id="rqFirst" placeholder="الاسم" autocomplete="given-name">
+      <input id="rqLast" placeholder="اللقب" autocomplete="family-name">
+      <select id="rqBranch" class="inp" onchange="trackFor(this.value)"></select>
+      <select id="rqTrack" class="inp hidden"></select>
+      <input id="rqPhone" type="tel" inputmode="tel" placeholder="رقم الهاتف" autocomplete="tel">
+      <input id="rqPass" type="password" placeholder="كلمة سر تختارها للدخول لاحقاً (6 أحرف على الأقل)" autocomplete="new-password">
+      <p style="text-align:right;margin:0 0 6px;font-size:.85rem">📎 صورة وصل الدفع</p>
+      <input id="rqFile" type="file" accept="image/*">
+      <button class="btn" id="rqBtn" style="width:100%" onclick="sendRequest()">إرسال الطلب 📩</button>
+      <p style="margin-top:12px"><a href="#" onclick="lkShow('login');return false" style="color:var(--blue)">لدي حساب مفعّل — تسجيل الدخول</a></p>
+    </div>
+    <div id="lkLogin" class="hidden">
+      <p>سجّل الدخول برقم هاتفك وكلمة السر التي اخترتها عند الاشتراك.</p>
+      <input id="lgPhone" type="tel" inputmode="tel" placeholder="رقم الهاتف">
+      <input id="lgPass" type="password" placeholder="كلمة السر">
+      <button class="btn" style="width:100%" onclick="loginPhone()">دخول 🚀</button>
+      <p style="margin-top:12px"><a href="#" onclick="lkShow('form');return false" style="color:var(--blue)">إرسال طلب اشتراك جديد</a></p>
+    </div>
+    <div id="lkPending" class="hidden">
+      <p>✅ وصل طلبك وهو قيد المراجعة.<br>سيفتح لك الموقع بمجرد قبوله، ويمكنك البقاء في هذه الصفحة.</p>
+      <button class="btn ghost" style="width:100%" onclick="checkStatus(true)">🔄 تحقق من حالة طلبي</button>
+    </div>
     <div class="lock-err" id="lockErr"></div>
-    <p style="margin-top:14px;font-size:.8rem">💬 للاشتراك: <a href="https://wa.me/213000000000" target="_blank" style="color:var(--blue)">تواصل مع Kamy</a></p>
+    <p style="margin-top:14px;font-size:.8rem">💬 للاستفسار: <a href="https://wa.me/213000000000" target="_blank" style="color:var(--blue)">تواصل مع Kamy</a> • <a href="#" onclick="adminEnter();return false" style="color:var(--gray)">المشرف</a></p>
   </div>
 </div>
 
@@ -184,6 +207,7 @@ footer{padding:24px 5% 100px;text-align:center;color:var(--gray);font-size:.8rem
   <div class="card">
     <span class="day-tag" id="tTag"></span>
     <ul class="pts" id="tPts"></ul>
+    <div id="tRes"></div>
     <div id="tVideo"><div class="video-ph">🎬 فيديو الدرس — يُضاف من لوحة تحكم Kamy</div></div>
     <div class="video-ph">📝 تطبيق Bac جزائري مرتبط بهذا الدرس — قريباً</div>
     <button class="btn green" style="width:100%;padding:13px;margin-top:14px" id="tDoneBtn" onclick="taskDone()">✔ تم — أنهيت المهمة</button>
@@ -246,19 +270,16 @@ footer{padding:24px 5% 100px;text-align:center;color:var(--gray);font-size:.8rem
 <div class="view" id="v-admin">
   <div class="sec-title"><span class="bar"></span> 🛠️ لوحة تحكم Kamy</div>
   <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px">
-    <button class="btn sm" id="ab1" onclick="adminTab('codes')">🔑 الرموز</button>
+    <button class="btn sm" id="ab1" onclick="adminTab('codes')">💳 الطلبات</button>
     <button class="btn sm ghost" id="ab2" onclick="adminTab('programs')">📚 البرامج</button>
     <button class="btn sm ghost" id="ab3" onclick="adminTab('students')">👥 الطلبة</button>
     <button class="btn sm ghost" id="ab4" onclick="adminTab('asks')">❓ الأسئلة</button>
     <button class="btn sm ghost" id="ab5" onclick="adminTab('review')">🔁 المراجعة</button>
+    <button class="btn sm ghost" id="ab6" onclick="adminTab('lib')">📖 المصادر</button>
   </div>
 
   <!-- Codes -->
-  <div id="ad-codes"><div class="card">
-    <h4 style="margin-bottom:12px">➕ توليد رمز تفعيل جديد</h4>
-    <button class="btn green sm" onclick="genCode()">توليد رمز</button>
-    <div id="codeList" style="margin-top:12px"></div>
-  </div></div>
+  <div id="ad-codes"><div id="codeList"></div></div>
 
   <!-- Programs (يدوي بلا كود!) -->
   <div id="ad-programs" class="hidden">
@@ -327,14 +348,36 @@ footer{padding:24px 5% 100px;text-align:center;color:var(--gray);font-size:.8rem
     </div>
   </div>
 
-  <div id="ad-students" class="hidden"><div class="card"><div id="stuList"></div></div></div>
+  <div id="ad-students" class="hidden"><div class="card"><input class="inp" id="stuQ" placeholder="🔎 بحث بالاسم أو رقم الهاتف" oninput="stuSearch()"><div id="stuList"></div></div></div>
   <div id="ad-asks" class="hidden"><div class="card"><div id="askList"></div></div></div>
   <div id="ad-review" class="hidden"><div class="card"><div id="revAdmList"></div></div></div>
+  <div id="ad-lib" class="hidden">
+    <div class="card" style="margin-bottom:14px">
+      <h4 style="margin-bottom:10px">➕ إضافة مصدر (ملخص، تمارين، فيديو، كتاب)</h4>
+      <select class="inp" id="lbBranch"></select>
+      <input class="inp" id="lbTrack" placeholder="التخصص أو اللغة (اختياري) مثل: مدنية أو ألمانية">
+      <input class="inp" id="lbSubject" placeholder="المادة (مثال: الرياضيات)">
+      <input class="inp" id="lbLesson" placeholder="الدرس (اختياري)">
+      <select class="inp" id="lbKind"><option>ملخص</option><option>تمارين</option><option>فيديو</option><option>كتاب</option><option>أخرى</option></select>
+      <input class="inp" id="lbTitle" placeholder="العنوان">
+      <input class="inp" id="lbUrl" placeholder="الرابط https://..." style="direction:ltr;text-align:left">
+      <button class="btn green" style="width:100%" onclick="addRes()">إضافة</button>
+      <p class="muted" style="margin-top:8px;font-size:.8rem">ضع رابط الملف من Google Drive أو Telegram أو غيرهما. ولربط مصدر بدرس معين افتح اليوم في تبويب البرامج.</p>
+    </div>
+    <div class="card"><div id="lbList"></div></div>
+  </div>
+</div>
+
+<div class="view" id="v-lib">
+  <div class="sec-title"><span class="bar"></span> 📚 المكتبة</div>
+  <div id="libChips" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px"></div>
+  <div id="libList"></div>
 </div>
 
 <nav id="bottomNav">
   <a data-v="dashboard" class="on" onclick="show('dashboard')"><span class="i">🏠</span>الرئيسية</a>
   <a data-v="week" onclick="show('week')"><span class="i">📅</span>الأسبوع</a>
+  <a data-v="lib" onclick="show('lib')"><span class="i">📚</span>المكتبة</a>
   <a data-v="review" onclick="show('review')"><span class="i">🔁</span>مراجعة</a>
   <a data-v="ask" onclick="show('ask')"><span class="i">❓</span>سؤال</a>
   <a data-v="stats" onclick="show('stats')"><span class="i">📊</span>تقدمي</a>
@@ -360,85 +403,29 @@ const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;'
 
 /* ==================== البرامج ==================== */
 const D=(amS,amT,pmS,pmT,pts,video)=>({am:{s:amS,t:amT},pm:{s:pmS,t:pmT,pts:pts||[],video:video||''}});
-const PROG_DEFAULT={
-'علوم تجريبية':{months:[
-{n:'الشهر الأول',weeks:[
- {days:[
-  D('العلوم الإسلامية','العقيدة وأثرها على الفرد والمجتمع — الجزء 1','علوم الطبيعة والحياة','تركيب البروتين',['العلاقة بين المعلومة الوراثية وتركيب البروتين','مراحل تشكل الـ ARNm','الترجمة على مستوى الريبوزومات','دور الـ ARNt والأحماض الأمينية','مراحل تركيب السلسلة الببتيدية','تطبيقات مدمجة على الوثائق والتسلسل النكليوتيدي']),
-  D('العلوم الإسلامية','العقيدة — الجزء 2','علوم الطبيعة والحياة','العلاقة بين بنية البروتين ووظيفته',['مستويات البنية الفراغية للبروتين','تسلسل الأحماض الأمينية والبنية النهائية','دور البنية الفراغية في تحديد الوظيفة','تأثير تغير البنية في النشاط البروتيني','تحليل تجارب ووثائق حول البروتينات']),
-  D('التاريخ','بروز الصراع وتشكل العالم — الجزء 1 + مصطلحات','الفيزياء','المتابعة الزمنية لتحول كيميائي — الجزء 1',['كتابة المعادلة الكيميائية وموازنتها','حساب كميات المادة الابتدائية','إنشاء جدول تقدم التفاعل','تحديد المتفاعل المحدد والتقدم الأعظمي','حساب الحصيلة النهائية للتحول','تطبيقات مدمجة على جدول التقدم']),
-  D('التاريخ','بروز الصراع وتشكل العالم — الجزء 3 + مصطلحات','الفيزياء','المتابعة الزمنية — الجزء 2',['طرق المتابعة التجريبية للتحول','استغلال منحنيات التقدم أو التركيز بدلالة الزمن','تعريف سرعة التفاعل وحسابها','العوامل الحركية المؤثرة في سرعة التفاعل','زمن نصف التفاعل واستخراجه بيانيًا','تمارين تطبيقية على المنحنيات']),
-  D('التاريخ','بروز الصراع وتشكل العالم + مصطلحات','الفيزياء','استكمال وحدة المتابعة الزمنية',['تعميق استغلال النتائج التجريبية','الربط بين التقدم والتركيز والسرعة','تحديد السرعة اللحظية انطلاقًا من المماس','دراسة تأثير تغير الشروط التجريبية','تطبيقات مدمجة بأفكار البكالوريا وتصحيح الأخطاء']),
-  D('التاريخ','إشكالية التقدم والتخلف + مصطلحات','الرياضيات','النهايات',['النهايات عند نقطة وعند المالانهاية','النهايات المنتهية وغير المنتهية','النهايات عند أطراف مجال التعريف','العمليات على النهايات وحالات عدم التعيين','طرق رفع حالات عدم التعيين','المستقيمات المقاربة الأفقية والعمودية والمائلة']),
-  D('الجغرافيا','المبادلات والتنقلات في العالم — الجزء 1 + مصطلحات','الرياضيات','الاستمرارية',['الاستمرارية عند نقطة وعلى مجال','العلاقة بين الاستمرارية وقابلية الاشتقاق','مبرهنة القيم المتوسطة','إثبات وجود حل لمعادلة','تحديد عدد الحلول باستعمال جدول التغيرات','تطبيقات على النهايات والاستمرارية'])]},
- {days:[
-  D('العلوم الإسلامية','وسائل تثبيت العقيدة — الجزء 1','علوم الطبيعة والحياة','النشاط الإنزيمي',['مفهوم الإنزيم والمحفز الحيوي','الموقع الفعال والمعقد إنزيم-ركيزة','نوعية الإنزيم تجاه الركيزة','تأثير درجة الحرارة ودرجة الحموضة','تأثير تركيز الركيزة والإنزيم','تحليل النتائج التجريبية والمنحنيات']),
-  D('العلوم الإسلامية','وسائل تثبيت العقيدة — الجزء 2','علوم الطبيعة والحياة','تمارين تركيب البروتين والإنزيمات',['تحليل وثائق التعبير الجيني','الربط بين البنية الفراغية والوظيفة','تفسير نتائج تجارب النشاط الإنزيمي','استغلال الجداول والمنحنيات','منهجية بناء إجابة علمية دقيقة']),
-  D('التاريخ','التعايش السلمي + مصطلحات وشخصيات','الكيمياء','الأكسدة والإرجاع — الجزء الأول',['تعريف المؤكسد والمرجع','تحديد أزواج Ox/Red','كتابة المعادلات النصفية الإلكترونية','موازنة معادلات الأكسدة والإرجاع','تطبيق جدول التقدم وحساب كميات المادة']),
-  D('الجغرافيا','حركة عدم الانحياز + مصطلحات وشخصيات','الكيمياء','المعايرة — الجزء الثاني',['مبدأ المعايرة الكيميائية','تحديد المتفاعل المعاير والمتفاعل المدروس','العلاقات بين كميات المادة عند التكافؤ','حساب نقطة التكافؤ','استغلال النتائج التجريبية']),
-  D('الجغرافيا','المبادلات والتنقلات — الجزء 2','الكيمياء','استكمال الأكسدة والإرجاع والمعايرة',['الربط بين المعادلة وجدول التقدم','حساب التركيز وكمية المادة في مسائل المعايرة','تحديد نقطة التكافؤ من المعطيات','تطبيقات مدمجة تجمع الوحدتين']),
-  D('الجغرافيا','أمريكا + مصطلحات','الرياضيات','الاشتقاقية',['تعريف المشتقة ومعدل التغير','التفسير الهندسي والمماس','قواعد الاشتقاق','مشتقات مركبة','حساب المشتقة وتحديد إشارتها']),
-  D('الجغرافيا','الاتحاد الأوروبي + مصطلحات','الرياضيات','دراسة الدوال',['حساب النهايات الضرورية','تحديد إشارة المشتقة','إنشاء جدول التغيرات','تحديد القيم الحدية','دراسة المقاربات ورسم المنحنى'])]},
- {days:[
-  D('العلوم الإسلامية','اليهودية','علوم الطبيعة والحياة','الذات واللاذات',['محددات الهوية البيولوجية','الواسمات الغشائية والتعرف على الذات','مفهوم المستضد','التمييز بين الذات واللاذات باستغلال الوثائق']),
-  D('العلوم الإسلامية','النصرانية','علوم الطبيعة والحياة','الاستجابة المناعية الخلطية',['التعرف على المستضد','دور اللمفاويات B','الانتقاء والتكاثر النسيلي','الخلايا البلازمية وخلايا الذاكرة','تحليل الوثائق التجريبية']),
-  D('العلوم الإسلامية','الإسلام','الفيزياء','السقوط الشاقولي — الجزء الأول',['اختيار المرجع والمحاور','دراسة السقوط الحر','تحديد القوى المؤثرة على الجسم','تطبيق القانون الثاني لنيوتن','حساب زمن السقوط والارتفاع والسرعة']),
-  D('الجغرافيا','النظام الدولي الجديد — الجزء 1 + مصطلحات','الفيزياء','السقوط الشاقولي — الجزء الثاني',['نمذجة قوة مقاومة الهواء','إنشاء المعادلة التفاضلية للحركة','النظام الانتقالي والنظام الدائم','السرعة الحدية','منحنيات السرعة والتسارع'])]},
- {days:[
-  D('العلوم الإسلامية','مقاصد الشريعة','علوم الطبيعة والحياة','الاستجابة المناعية الخلطية (التائية)',['دور اللمفاويات التائية','الانتقاء والتكاثر النسيلي','الخلايا الفعالة وخلايا الذاكرة','تحليل الوثائق الخاصة بالاستجابة الخلوية']),
-  D('العلوم الإسلامية','حجة الوداع','علوم الطبيعة والحياة','التنفس الخلوي والحصيلة الطاقوية',['التنفس والتخمر وشروط حدوثهما','مقارنة التنفس الخلوي والتخمر','حصيلة ATP في المسارات المدروسة','مقارنة مردود تحويل الطاقة','تطبيقات مدمجة حول الطاقة في الخلية']),
-  D('العلوم الإسلامية','القصاص','الفيزياء','الحركة على المستوى — الجزء الأول',['اختيار المرجع والمحاور','القوى المؤثرة على الجسم','القانون الثاني لنيوتن','الحركة الأفقية والمائلة','تأثير الاحتكاك','حساب التسارع والسرعة والمسافة']),
-  D('العلوم الإسلامية','التعزير','الفيزياء','حركة القذيفة — الجزء الثاني',['تحليل الحركة إلى مركبتين أفقية وشاقولية','المعادلات الزمنية','معادلة المسار','زمن الحركة والمدى الأفقي','الارتفاع الأقصى والمدى المختلف'])]}]},
-{n:'الشهر الثاني',weeks:[
- {days:[
-  D('العلوم الإسلامية','المساواة','علوم الطبيعة والحياة','النقل المشبكي وكمون الراحة',['بنية المشبك العصبي ومكوناته','انتقال الرسالة العصبية على مستوى المشبك','الوسائط الكيميائية والمستقبلات الغشائية','كمون الراحة وتوزيع الشوارد','استغلال الرسومات والوثائق التجريبية']),
-  D('العلوم الإسلامية','الصحة الجسمية والنفسية','علوم الطبيعة والحياة','كمون العمل والإدماج العصبي وتأثير المخدرات',['مراحل كمون العمل','تغير نفاذية الغشاء أثناء التنبيه','الإدماج العصبي والرسائل المثبطة','تأثير المخدرات في النقل المشبكي','تحليل المنحنيات والتجارب']),
-  D('العلوم الإسلامية','الإجماع','الفيزياء','حركة الكواكب والأقمار الاصطناعية — الجزء 1',['قانون التجاذب العام لنيوتن','القوى بين الأجرام','الحركة الدائرية المنتظمة','التسارع المركزي وعلاقته بالسرعة ونصف القطر']),
-  D('العلوم الإسلامية','التعزير','الفيزياء','حركة الكواكب — الجزء 2',['سرعة الكوكب أو القمر الاصطناعي','الدور ونصف قطر المدار','الارتفاع عن سطح الأرض','قوانين كبلر حسب البرنامج']),
-  D('العلوم الإسلامية','المصالح المرسلة','الفيزياء','استكمال حركة الكواكب والأقمار الاصطناعية',['التجاذب والتسارع المركزي','العلاقات الرياضية للحركة المدارية','مسائل الدور والسرعة والارتفاع','تطبيقات بأفكار البكالوريا']),
-  D('التاريخ','استعادة السيادة الوطنية — الجزء 1 + مصطلحات','الرياضيات','المتتاليات العددية — الجزء 1',['تعريف المتتالية وطرق تعريفها','المتتاليات الحسابية والهندسية','الحد العام','حساب الحدود','دراسة اتجاه التغير']),
-  D('التاريخ','استعادة السيادة الوطنية + مصطلحات','الرياضيات','المتتاليات — الجزء 2',['العلاقة التراجعية','إثبات خصائص بالاستقراء','الرتابة والحصر','النهايات وتقارب المتتاليات'])]},
- {days:[
-  D('العلوم الإسلامية','القيم','علوم الطبيعة والحياة','تطبيقات شاملة في المناعة',['الربط بين الاستجابة الخلطية والخلوية','تحليل نتائج التجارب المناعية','تفسير دور الخلايا والأجسام المضادة','استغلال الوثائق العلمية المركبة','منهجية الإجابة العلمية في البكالوريا']),
-  D('العلوم الإسلامية','الوقف','علوم الطبيعة والحياة','تطبيقات شاملة في الاتصال العصبي',['الربط بين كمون الراحة وكمون العمل','تحليل النقل المشبكي','تأثير المواد الكيميائية والمخدرات','الإدماج العصبي من الوثائق','تطبيق شامل مع تصحيح منهجي']),
-  D('العلوم الإسلامية','الميراث — الجزء 1','الفيزياء','دائرة RC — المكثفة وشحنها',['بنية المكثفة وخصائصها','العلاقة بين الشحنة والتوتر','سلوك المكثفة أثناء الشحن','شدة التيار والتوتر في الدارة']),
-  D('العلوم الإسلامية','الميراث — الجزء 2','الفيزياء','دائرة RC — التفريغ والثابت الزمني',['تفريغ المكثفة عبر مقاومة','المعادلة التفاضلية','تغير الشحنة والتوتر مع الزمن','الثابت الزمني وتفسيره','المنحنيات والمماسات']),
-  D('العلوم الإسلامية','النسب','الفيزياء','استكمال دائرة RC',['مقارنة الشحن والتفريغ','تأثير R وC على الثابت الزمني','استخراج المعلمات من المنحنيات','حساب الطاقة المخزنة','تطبيقات مدمجة على دائرة RC']),
-  D('العلوم الإسلامية','التبني','الرياضيات','تعميق دراسة الدوال',['النهايات والاشتقاق','اتجاه التغير والقيم الحدية','المقاربات','جدول التغيرات','الربط بين المعطيات الجبرية والبيانية']),
-  D('العلوم الإسلامية','الكفالة','الرياضيات','الدوال المركبة',['دوال أسية ولوغاريتمية','حساب النهايات والمشتقات','حل المعادلات والمتراجحات','جدول التغيرات','تطبيقات شاملة مع التصحيح'])]}]},
-{n:'الشهر الثالث',weeks:[
- {days:[
-  D('العلوم الإسلامية','بيع التقسيط','علوم الطبيعة والحياة','تحويل الطاقة الضوئية',['مقرر التركيب الضوئي والبنيات المتدخلة','شروط حدوث التركيب الضوئي','دور الضوء واليخضور','التحويل إلى طاقة كيميائية','تجارب الكشف عن الشروط']),
-  D('العلوم الإسلامية','بيع المرابحة','علوم الطبيعة والحياة','آليات تحويل الطاقة الكيميائية إلى ATP',['مفهوم ATP ودوره في الخلية','المادة العضوية والطاقة','آليات إنتاج ATP حسب المسار المدروس','الأغشية والتدرج البروتوني','الوثائق التجريبية لإنتاج الطاقة']),
-  D('العلوم الإسلامية','بيع الصرف','الفيزياء','دائرة RL — الوشيعة والتحريض الذاتي',['بنية الوشيعة وخصائصها','التحريض الذاتي','التوتر بين طرفي الوشيعة','تأثير تغير شدة التيار']),
-  D('العلوم الإسلامية','الحرية الشخصية','الفيزياء','دائرة RL — إنشاء التيار وقطعه',['المعادلة التفاضلية لشدة التيار','النظام الانتقالي والنظام الدائم','الثابت الزمني لدائرة RL','منحنيات شدة التيار والتوتر','قوانين الدارة الكهربائية']),
-  D('العلوم الإسلامية','النسيب','الفيزياء','استكمال دائرة RL',['الطاقة المغناطيسية المخزنة في الوشيعة','خصائص الوشيعة والمقاومة','الثابت الزمني من المنحنيات','مقارنة سلوك RC وRL','تطبيقات على الدارتين']),
-  D('العلوم الإسلامية','التبني','الرياضيات','تعميق دراسة الدوال',['النهايات والاشتقاق','اتجاه التغير والقيم الحدية','المقاربات','جدول التغيرات','الربط الجبري البياني']),
-  D('العلوم الإسلامية','الكفالة','الرياضيات','الدوال المركبة',['الدوال الأسية واللوغاريتمية','النهايات والمشتقات','المعادلات والمتراجحات','جدول التغيرات','تطبيقات شاملة'])]},
- {days:[
-  D('العلوم الإسلامية','بيع التقسيط — الجزء 2','علوم الطبيعة والحياة','تحويل الطاقة الضوئية — تطبيقات شاملة',['تحليل وثائق التركيب الضوئي','تفسير التجارب المبرهنة على الشروط','ربط العوامل المؤثرة بالنتائج','منهجية إجابة شاملة']),
-  D('العلوم الإسلامية','بيع المرابحة — الجزء 2','علوم الطبيعة والحياة','ATP — تطبيقات شاملة',['تحليل منحنيات إنتاج الطاقة','مقارنة المسارات الأيضية','تفسير دور الأغشية','تطبيقات مركبة']),
-  D('العلوم الإسلامية','بيع الصرف — الجزء 2','الفيزياء','تحويل الطاقة الكيميائية — تطبيقات',['تطبيقات على إنتاج ATP','تحليل الوثائق التجريبية','حسابات الطاقة','منهجية الإجابة']),
-  D('العلوم الإسلامية','الحرية الشخصية — الجزء 2','الفيزياء','تطبيقات شاملة في تحويل الطاقة',['مسائل تجمع الطاقة الضوئية والكيميائية','تحليل مقارن بين المسارات','تطبيقات بكالوريا سابقة']),
-  D('التاريخ','مصطلحات تاريخ','الفيزياء','استكمال التحولات النووية',['قانون التناقص الإشعاعي','النشاط ونصف العمر','الطاقة المحررة في التحولات','حسابات نووية تطبيقية']),
-  D('التاريخ','مصطلحات تاريخ','الرياضيات','استكمال المتتاليات العددية',['مراجعة طرق التعريف','الرتابة والحصر','إثبات خصائص المتتالية','تطبيقات على المتتاليات التراجعية']),
-  D('التاريخ','مصطلحات تاريخ','الرياضيات','استكمال الاحتمالات',['المتغيرات العشوائية المتقطعة','حساب الاحتمالات الشرطية','قانون الاحتمال والأمل الرياضي','تطبيقات على مسائل البكالوريا'])]},
- {days:[
-  D('الجغرافيا','مصطلحات جغرافيا','علوم الطبيعة والحياة','مبدأ البنية الداخلية والظواهر المرتبطة بالمظهر',['بنية الظهيرة المحيطية','خصائص المناطق المتباعدة','تشكل القشرة المحيطية','العلاقة بين الظهيرة والنشاط البركاني والزلزالي','الوثائق والرسومات التفسيرية']),
-  D('الجغرافيا','مصطلحات جغرافيا','علوم الطبيعة والحياة','البنية الداخلية للكرة الأرضية',['القشرة والوشاح والنواة','التمييز بين الخصائص الفيزيائية والكيميائية للطبقات','المعطيات الزلزالية في تحديد البنية الداخلية','الرسومات الجيولوجية'])]},
- {days:[
-  D('الجغرافيا','مصطلحات جغرافيا','الفيزياء','التحولات النووية — الجزء الأول',['بنية النواة والنظائر','الفجوات وعدم استقرار النواة','أنواع التحولات النووية','كتابة معادلات التحول النووي']),
-  D('الجغرافيا','مصطلحات جغرافيا','الفيزياء','التحولات النووية — الجزء الثاني',['النشاط الإشعاعي ووحداته','قانون التناقص الأسي','زمن نصف العمر وحساباته','الطاقة المحررة والنقص الكتلي','تطبيقات على التأريخ'])]},
- {days:[
-  D('مراجعة إسلامية','مراجعة شاملة','علوم الطبيعة والحياة','المنهج الداخلي والظواهر المرتبطة بالمظهر + تطبيقات',['مراجعة مبدأ البنية الداخلية','تطبيقات على الوثائق الجيولوجية','تحليل الرسومات والمنحنيات']),
-  D('مراجعة إسلامية','مراجعة شاملة','اللغة العربية','الشعر التعليمي والنثر العلمي — الجزء 1',['20:00-21:00 text historique مع قواعده','21:00-22:00 ethics in business مع قواعده','فيديو قواعد الأستاذ حيحون — الجزء 1 مع تطبيق']),
-  D('مراجعة إسلامية','مراجعة شاملة','اللغة العربية','شعر المهجر',['20:00-21:00 débat d\u2019idée مع قواعده','21:00-22:00 safety and food مع قواعده','فيديو قواعد الأستاذ حيحون — الجزء 2 مع تطبيق']),
-  D('مراجعة إسلامية','مراجعة شاملة','اللغة العربية','شعر سياسي وشعر اجتماعي',['20:00-21:00 l\u2019appel مع قواعده','21:00-22:00 astronomy مع قواعده','فيديو قواعد الأستاذ حيحون — الجزء 3'])]}]}
-]},
-'رياضيات':null,'تقني رياضي':null,'تسيير واقتصاد':null,'آداب وفلسفة':null,'لغات أجنبية':null};
+const PROG_DEFAULT={'علوم تجريبية':null,'رياضيات':null,'تقني رياضي':null,'تسيير واقتصاد':null,'آداب وفلسفة':null,'لغات أجنبية':null};
 let PROG=JSON.parse(JSON.stringify(PROG_DEFAULT));
-Object.keys(store.get('swk_progs',{})).forEach(b=>{PROG[b]=store.get('swk_progs',{})[b]});
-function saveProgs(){const o={};Object.keys(PROG).forEach(b=>{if(PROG[b])o[b]=PROG[b]});store.set('swk_progs',o);}
+async function saveProgs(b){b=b||prB;if(!sb||!b||!PROG[b])return;const {error}=await sb.from('program').upsert({branch:b,data:PROG[b]});if(error)toast('⚠️ '+error.message);}
+const TRACKS={'تقني رياضي':['ميكانيك','مدنية','طرائق','كهرباء'],'لغات أجنبية':['ألمانية','إسبانية','إيطالية']};
+function trackFor(b){const s=document.getElementById('rqTrack'),t=TRACKS[b];if(!t){s.classList.add('hidden');s.innerHTML='';return;}s.innerHTML='<option value="">'+(b==='تقني رياضي'?'اختر تخصصك':'اختر لغتك الأجنبية الثالثة')+'</option>'+t.map(x=>`<option>${x}</option>`).join('');s.classList.remove('hidden');}
+function adaptTrack(){const p=PROG[user&&user.branch],t=user&&user.track;if(!p||!t)return;p.months.forEach(m=>m.weeks.forEach(w=>w.days.forEach(d=>{const x=d.pm;if(x&&x.s==='هندسة'&&Array.isArray(x.pts)){const l=x.pts.filter(q=>q.startsWith(t+':'));if(l.length){x.t='هندسة — '+t;x.pts=l.map(q=>q.slice(t.length+1).trim());}}})));}
+const RK={'ملخص':'📄','تمارين':'✏️','فيديو':'🎬','كتاب':'📘','أخرى':'🔗'};
+const okUrl=u=>/^https?:\/\//i.test(u||'');
+function resHTML(list){return (list||[]).filter(r=>okUrl(r.u)).map(r=>`<a class="btn sm ghost" style="margin:6px 0 0 6px;display:inline-block" href="${esc(r.u)}" target="_blank" rel="noopener noreferrer">${RK[r.k]||'🔗'} ${esc(r.t||r.k)}</a>`).join('');}
+const resToText=l=>(l||[]).map(r=>[r.k,r.t,r.u].join('|')).join('\n');
+const textToRes=t=>t.split('\n').map(l=>l.split('|').map(x=>x.trim())).filter(a=>a.length>=3&&okUrl(a.slice(2).join('|'))).map(a=>({k:a[0],t:a[1],u:a.slice(2).join('|')}));
+async function loadMyProgram(){
+  if(!sb||!user)return;
+  const key='swk_prog_'+user.branch;let c=null;try{c=JSON.parse(localStorage.getItem(key)||'null');}catch(e){}
+  try{
+    const {data:v,error:ve}=await sb.rpc('program_version');
+    if(!ve&&v&&c&&c.v===v&&c.data){PROG[user.branch]=c.data;adaptTrack();return;}
+    const {data,error}=await sb.rpc('get_program');
+    if(!error&&data){try{localStorage.setItem(key,JSON.stringify({v:v||null,data}));}catch(e){}PROG[user.branch]=data;adaptTrack();return;}
+  }catch(e){}
+  if(c&&c.data){PROG[user.branch]=c.data;adaptTrack();}
+}
+async function loadAllPrograms(){if(!sb)return;const {data}=await sb.from('program').select('branch,data');(data||[]).forEach(r=>{PROG[r.branch]=r.data});}
 const SUBJ_COLOR={'العلوم الإسلامية':['🕌','#143d33'],'التاريخ':['🏛️','#3d2f14'],'الجغرافيا':['🌍','#22345f'],'علوم الطبيعة والحياة':['🔬','#3d1533'],'الفيزياء':['⚡','#0e3a52'],'الكيمياء':['⚗️','#143d33'],'الرياضيات':['📐','#2a2f5e'],'اللغة العربية':['✒️','#3d1533'],'مراجعة إسلامية':['🕌','#143d33'],'الفلسفة':['🤔','#2a2f5e'],'اللغة الفرنسية':['🇫🇷','#22345f'],'اللغة الإنجليزية':['🇬🇧','#143d33'],'الاقتصاد والتسيير':['💼','#3d2f14'],'التكنولوجيا':['⚙️','#0e3a52']};
 
 /* ==================== STATE ==================== */
@@ -446,25 +433,65 @@ let user=store.get('swk_user',null);
 let S=store.get('swk_state',{xp:0,streak:0,lastStudy:'',done:[],review:[],asks:[]});
 
 /* ==================== UNLOCK ==================== */
-async function tryUnlock(){
-  const v=document.getElementById('codeInput').value.trim().toUpperCase(),err=document.getElementById('lockErr');
-  if(!v)return;
-  if(!sb){err.textContent='⚠️ الموقع غير مربوط بقاعدة البيانات بعد';return;}
-  err.textContent='⏳ ...';
-  const {data,error}=await sb.rpc('check_code',{p_code:v});
-  if(error){err.textContent='⚠️ تعذر الاتصال، حاول مرة أخرى';return;}
-  if(!data){err.textContent='❌ رمز غير صحيح أو مستعمل';return;}
-  window._code=v;err.textContent='';
-  document.getElementById('lock').style.display='none';
-  document.getElementById('onboarding').classList.remove('hidden');buildOb();
+
+function lkShow(m){
+  [['Form','form'],['Login','login'],['Pending','pending']].forEach(a=>document.getElementById('lk'+a[0]).classList.toggle('hidden',a[1]!==m));
+  document.getElementById('lockErr').textContent='';
+  if(m==='form'){const s=document.getElementById('rqBranch');if(s.options.length<2)s.innerHTML='<option value="">اختر شعبتك</option>'+Object.keys(PROG).map(b=>`<option value="${esc(b)}">${esc(b)}</option>`).join('');}
+  clearInterval(window._poll);if(m==='pending')window._poll=setInterval(()=>checkStatus(false),20000);
 }
-document.getElementById('codeInput').addEventListener('keydown',e=>{if(e.key==='Enter')tryUnlock();});
+const lkErr=t=>{document.getElementById('lockErr').textContent=t;};
+function shrink(file){return new Promise((ok,no)=>{const i=new Image(),u=URL.createObjectURL(file);i.onload=()=>{const k=Math.min(1,1400/Math.max(i.width,i.height)),c=document.createElement('canvas');c.width=Math.round(i.width*k);c.height=Math.round(i.height*k);c.getContext('2d').drawImage(i,0,0,c.width,c.height);c.toBlob(b=>{URL.revokeObjectURL(u);b?ok(b):no(new Error('صورة غير صالحة'));},'image/jpeg',.8);};i.onerror=()=>no(new Error('صورة غير صالحة'));i.src=u;});}
+async function sendRequest(){
+  const g=id=>document.getElementById(id).value.trim(),first=g('rqFirst'),last=g('rqLast'),branch=g('rqBranch'),phone=g('rqPhone').replace(/\D/g,''),pass=document.getElementById('rqPass').value,file=document.getElementById('rqFile').files[0],track=document.getElementById('rqTrack').value;
+  if(!sb){lkErr('⚠️ الموقع غير مربوط بقاعدة البيانات بعد');return;}
+  if(!first||!last||!branch||phone.length<8||pass.length<6||!file){lkErr('املأ كل الحقول وأرفق صورة وصل الدفع (كلمة السر 6 أحرف على الأقل)');return;}
+  if(TRACKS[branch]&&!track){lkErr(branch==='تقني رياضي'?'اختر تخصصك':'اختر لغتك الأجنبية الثالثة');return;}
+  const btn=document.getElementById('rqBtn');btn.disabled=true;lkErr('⏳ جاري الإرسال...');
+  try{
+    await ensureSession();const {data:{session}}=await sb.auth.getSession();
+    const blob=await shrink(file),path=session.user.id+'/'+Date.now()+'.jpg';
+    const up=await sb.storage.from('receipts').upload(path,blob,{contentType:'image/jpeg'});if(up.error)throw up.error;
+    const {error}=await sb.rpc('submit_request',{p_first:first,p_last:last,p_branch:branch,p_phone:phone,p_pass:pass,p_receipt:path,p_track:track||null});if(error)throw error;
+    lkShow('pending');
+  }catch(e){const m=e&&e.message||String(e);lkErr(m==='phone_exists'?'هذا الرقم مسجّل من قبل. استعمل «لدي حساب مفعّل».':m==='invalid'?'تحقق من الحقول':'⚠️ تعذر الإرسال: '+m);}
+  btn.disabled=false;
+}
+async function checkStatus(manual){
+  if(!sb)return false;
+  const {data:{session}}=await sb.auth.getSession();if(!session){lkShow('form');return false;}
+  const {data:me}=await sb.from('students').select('name,branch,status,track').eq('id',session.user.id).maybeSingle();
+  if(!me){lkShow('form');return false;}
+  if(me.status==='approved'){user={name:me.name,branch:me.branch,track:me.track,at:new Date().toISOString()};store.set('swk_user',user);localStorage.setItem('swk_auth','1');clearInterval(window._poll);document.getElementById('lock').style.display='none';enterApp();return true;}
+  lkShow('pending');if(manual)lkErr('⏳ طلبك ما زال قيد المراجعة');return false;
+}
+async function loginPhone(){
+  const ph=document.getElementById('lgPhone').value.replace(/\D/g,''),pw=document.getElementById('lgPass').value;
+  if(!sb)return;if(ph.length<8||!pw){lkErr('اكتب رقم الهاتف وكلمة السر');return;}
+  lkErr('⏳ ...');
+  try{
+    await ensureSession();const {data:r,error}=await sb.rpc('login_phone',{p_phone:ph,p_pass:pw});if(error)throw error;
+    if(r&&r.error){lkErr({bad_login:'❌ رقم الهاتف أو كلمة السر غير صحيحة',too_many:'⛔ محاولات كثيرة، انتظر 15 دقيقة',device_limit:'⛔ وصل حسابك لعدد الأجهزة المسموح. تواصل مع Kamy.',already_registered:'⚠️ هذا المتصفح مسجّل بحساب آخر',pending:'⏳ طلبك ما زال قيد المراجعة'}[r.error]||'⚠️ '+r.error);return;}
+    user={name:r.name,branch:r.branch,track:r.track,at:new Date().toISOString()};store.set('swk_user',user);localStorage.setItem('swk_auth','1');
+    document.getElementById('lock').style.display='none';enterApp();
+  }catch(e){lkErr('⚠️ '+(e.message||e));}
+}
+async function adminLogin(){
+  if(!sb)return false;if(window._isAdmin)return true;
+  const email=prompt('بريد Kamy:');if(!email)return false;const password=prompt('كلمة السر:');if(!password)return false;
+  const {error}=await sb.auth.signInWithPassword({email,password});if(error){alert('بيانات الدخول غير صحيحة');return false;}
+  const {data}=await sb.from('admins').select('user_id').maybeSingle();if(!data){alert('هذا الحساب ليس مشرفاً');return false;}
+  window._isAdmin=true;return true;
+}
+async function adminEnter(){if(!await adminLogin())return;user={name:'المشرف',branch:'علوم تجريبية'};await loadAllPrograms();document.getElementById('lock').style.display='none';await enterApp();show('admin');adminTab('codes');}
+async function decide(id,ok){if(ok)await sb.from('students').update({status:'approved'}).eq('id',id);else if(confirm('رفض هذا الطلب وحذفه؟'))await sb.from('students').delete().eq('id',id);renderAdm();}
 
 /* ==================== ONBOARDING ==================== */
 let obBranch=null;
-function buildOb(){
-  document.getElementById('obBranches').innerHTML=Object.keys(PROG).map(b=>
-    `<div class="opt" data-v="${esc(b)}" onclick="selB(this)"><div class="oi">${PROG[b]?'📗':'🕐'}</div><div><b>${esc(b)}</b><p>${PROG[b]?'البرنامج جاهز ✅':'البرنامج قيد التجهيز — قريباً'}</p></div></div>`).join('');
+async function buildOb(){
+  let ready=[];try{const {data}=await sb.rpc('ready_branches');ready=data||[];}catch(e){}
+  const all=[...new Set([...Object.keys(PROG),...ready])];
+  document.getElementById('obBranches').innerHTML=all.map(b=>{const r=ready.includes(b);return `<div class="opt" data-v="${esc(b)}" onclick="selB(this)"><div class="oi">${r?'📗':'🕐'}</div><div><b>${esc(b)}</b><p>${r?'البرنامج جاهز ✅':'البرنامج قيد التجهيز — قريباً'}</p></div></div>`}).join('');
 }
 function selB(el){document.querySelectorAll('#obBranches .opt').forEach(o=>o.classList.remove('sel'));el.classList.add('sel');obBranch=el.dataset.v;}
 function obGo(){const n=document.getElementById('obName').value.trim();if(!n){alert('اكتب سميتك');return;}window._obName=n;document.querySelector('.ob-step[data-s="1"]').style.display='none';document.querySelector('.ob-step[data-s="2"]').style.display='block';}
@@ -497,20 +524,49 @@ function todayIdx(){
 function fmtD(d){return d.toLocaleDateString('ar-DZ',{weekday:'long',day:'numeric',month:'long'});}
 
 /* ==================== APP ==================== */
-function enterApp(){
+async function setStart(){
+  let s=null;
+  if(sb&&!window._isAdmin){try{const {data}=await sb.rpc('start_now');if(data)s=data;}catch(e){}}
+  if(!s)s=user.start||user.at||new Date().toISOString();
+  user.start=s;if(!window._isAdmin)store.set('swk_user',user);
+  START_DATE=new Date(s);
+}
+async function enterApp(){
   document.getElementById('app').classList.remove('hidden');
   document.getElementById('hAvatar').textContent=user.name[0];
   document.getElementById('wName').textContent=user.name;
   const MOTS=['النجاح هو مجموع الجهود الصغيرة المتكررة كل يوم 💪','ما كاينش مستحيل، كاين غير "مازال ما بديتش" 🚀','كل مهمة كتكملها اليوم، هي نقطة كتربحيها فالباك 🎯','الاستمرارية تغلب الحماس — ركز على اليوم ديالك فقط 📅'];
   document.getElementById('wMot').textContent=MOTS[new Date().getDate()%MOTS.length];
   if(!window._cdT)window._cdT=setInterval(renderCD,60000);
-  renderAll();
+  await loadMyProgram();await setStart();renderAll();
 }
+async function renderLib(){
+  const box=document.getElementById('libList'),chips=document.getElementById('libChips'),items=[],p=PROG[user.branch];
+  if(p)p.months.forEach(m=>m.weeks.forEach(w=>w.days.forEach(d=>['am','pm'].forEach(k=>{const x=d[k];(x.res||[]).forEach(r=>{if(okUrl(r.u))items.push({s:x.s,k:r.k,t:r.t||r.k,u:r.u,l:x.t});});}))));
+  if(sb){const {data}=await sb.from('resources').select('*').order('created_at',{ascending:false});(data||[]).forEach(r=>{if(okUrl(r.url))items.push({s:r.subject,k:r.kind,t:r.title,u:r.url,l:r.lesson||''});});}
+  const subs=[...new Set(items.map(i=>i.s))],cur=subs.includes(window._libSub)?window._libSub:'';
+  chips.innerHTML=['الكل',...subs].map(s=>`<button class="btn sm ${((s==='الكل'&&!cur)||s===cur)?'':'ghost'}" data-s="${esc(s==='الكل'?'':s)}" onclick="libPick(this)">${esc(s)}</button>`).join('');
+  const list=items.filter(i=>!cur||i.s===cur);
+  box.innerHTML=list.length?list.map(i=>`<a class="card" style="display:block;margin-bottom:10px" href="${esc(i.u)}" target="_blank" rel="noopener noreferrer"><b>${RK[i.k]||'🔗'} ${esc(i.t)}</b><p class="muted" style="margin-top:4px">${esc(i.s)}${i.l?' • '+esc(i.l):''} • ${esc(i.k)}</p></a>`).join(''):'<p class="muted">لا مصادر بعد. ستظهر هنا الملخصات والتمارين والكتب عند إضافتها.</p>';
+}
+function libPick(b){window._libSub=b.dataset.s;renderLib();}
+async function renderLibAdm(){
+  const sel=document.getElementById('lbBranch');if(sel.options.length<2)sel.innerHTML='<option value="">كل الشعب</option>'+Object.keys(PROG).map(b=>`<option>${esc(b)}</option>`).join('');
+  const {data,error}=await sb.from('resources').select('*').order('created_at',{ascending:false});
+  document.getElementById('lbList').innerHTML=error?'<p class="muted">⚠️ '+esc(error.message)+'</p>':((data||[]).map(r=>`<div class="list-item" style="align-items:flex-start"><div><b>${RK[r.kind]||'🔗'} ${esc(r.title)}</b><p class="muted">${esc(r.branch||'كل الشعب')}${r.track?' • '+esc(r.track):''} • ${esc(r.subject)}${r.lesson?' • '+esc(r.lesson):''}</p></div><button class="btn sm red" onclick="delRes(${r.id})">حذف</button></div>`).join('')||'<p class="muted">لا مصادر بعد.</p>');
+}
+async function addRes(){
+  const g=id=>document.getElementById(id).value.trim(),u=g('lbUrl'),row={branch:g('lbBranch')||null,track:g('lbTrack')||null,subject:g('lbSubject'),lesson:g('lbLesson')||null,kind:g('lbKind'),title:g('lbTitle'),url:u};
+  if(!row.subject||!row.title||!okUrl(u)){toast('⚠️ املأ المادة والعنوان ورابطاً يبدأ بـ https://');return;}
+  const {error}=await sb.from('resources').insert(row);if(error){toast('⚠️ '+error.message);return;}
+  ['lbTrack','lbSubject','lbLesson','lbTitle','lbUrl'].forEach(i=>{document.getElementById(i).value='';});toast('✅ أُضيف المصدر');renderLibAdm();
+}
+async function delRes(id){if(!confirm('حذف هذا المصدر؟'))return;await sb.from('resources').delete().eq('id',id);renderLibAdm();}
 function show(v){
   document.querySelectorAll('.view').forEach(x=>x.classList.remove('active'));
   document.getElementById('v-'+v).classList.add('active');
   document.querySelectorAll('#bottomNav a').forEach(a=>a.classList.toggle('on',a.dataset.v===v));
-  if(v==='week')renderWeek();if(v==='stats')renderStats();if(v==='review')renderReview();if(v==='ask')renderMyAsks();
+  if(v==='lib')renderLib();if(v==='week')renderWeek();if(v==='stats')renderStats();if(v==='review')renderReview();if(v==='ask')renderMyAsks();
   window.scrollTo(0,0);
 }
 function toast(t){const el=document.getElementById('toast');el.textContent=t;el.style.display='block';setTimeout(()=>el.style.display='none',2600);}
@@ -590,6 +646,7 @@ function openTask(idx,label){
   document.getElementById('tMeta').textContent=`${sess.s} • ${fd.month} • الأسبوع ${fd.wi+1} • DAY ${fd.day} • ${label==='am'?'06:00-07:00':'18:00-22:00'}`;
   document.getElementById('tTag').textContent=user.branch;
   document.getElementById('tPts').innerHTML=(sess.pts||[]).map(p=>`<li>${esc(p)}</li>`).join('');
+  document.getElementById('tRes').innerHTML=resHTML(sess.res);
   const vid=(sess.video||'').trim(),ym=vid.match(/(?:youtu\.be\/|v=|embed\/)([\w-]{11})/);
   const vsrc=ym?'https://www.youtube.com/embed/'+ym[1]:(/^https:\/\//i.test(vid)?vid:'');
   document.getElementById('tVideo').innerHTML=vsrc?`<div class="video-frame"><iframe src="${esc(vsrc)}" allowfullscreen></iframe></div>`:'<div class="video-ph">🎬 فيديو الدرس — يُضاف من لوحة تحكم Kamy</div>';
@@ -681,39 +738,56 @@ function askAI(preset){
 }
 
 /* ==================== ADMIN ==================== */
-document.getElementById('hAvatar').addEventListener('dblclick',async()=>{
-  if(!sb)return;
-  const email=prompt('بريد Kamy:');if(!email)return;
-  const password=prompt('كلمة السر:');if(!password)return;
-  const {error}=await sb.auth.signInWithPassword({email,password});
-  if(error){alert('بيانات الدخول غير صحيحة');return;}
-  const {data}=await sb.from('admins').select('user_id').maybeSingle();
-  if(!data){alert('هذا الحساب ليس مشرفاً');return;}
-  show('admin');adminTab('codes');
-});
+document.getElementById('hAvatar').addEventListener('dblclick',async()=>{if(!await adminLogin())return;await loadAllPrograms();show('admin');adminTab('codes');});
 function adminTab(t){
-  ['codes','programs','students','asks','review'].forEach(x=>document.getElementById('ad-'+x).classList.toggle('hidden',x!==t));
-  const map={codes:1,programs:2,students:3,asks:4,review:5};
-  for(let i=1;i<=5;i++)document.getElementById('ab'+i).className='btn sm'+(i===map[t]?'':' ghost');
-  if(t==='programs')prGo('branch');
+  ['codes','programs','students','asks','review','lib'].forEach(x=>document.getElementById('ad-'+x).classList.toggle('hidden',x!==t));
+  const map={codes:1,programs:2,students:3,asks:4,review:5,lib:6};
+  for(let i=1;i<=6;i++)document.getElementById('ab'+i).className='btn sm'+(i===map[t]?'':' ghost');
+  window._adTab=t;if(t==='programs')prGo('branch');if(t==='lib')renderLibAdm();
   renderAdm();
 }
-async function renderAdm(){
+const PG=50;
+const pager=(pg,count,fn)=>`<p class="muted" style="margin:10px 0 6px">الإجمالي: ${count}</p><div style="display:flex;gap:8px"><button class="btn sm ghost" ${pg?'':'disabled'} onclick="${fn}(-1)">→ السابق</button><button class="btn sm ghost" ${(pg+1)*PG<count?'':'disabled'} onclick="${fn}(1)">التالي ←</button></div>`;
+async function renderAdm(){const f={codes:admRequests,students:admStudents,asks:admAsks,review:admReviews}[window._adTab||'codes'];if(f)await f();}
+async function admRequests(){
   const $=id=>document.getElementById(id);
-  const [c,s,a,r]=await Promise.all([
-    sb.from('codes').select('*').order('created_at',{ascending:false}),
-    sb.from('students').select('*').order('created_at',{ascending:false}),
-    sb.from('asks').select('*, students(name)').order('created_at',{ascending:false}),
-    sb.from('reviews').select('*, students(name)').order('created_at',{ascending:false})]);
-  if(c.error){toast('⚠️ سجّل الدخول كمشرف (نقر مزدوج على الصورة)');return;}
-  const nm=x=>esc(x.students&&x.students.name);
-  $('codeList').innerHTML=(c.data||[]).map(x=>`<div class="list-item"><span style="font-family:monospace;font-weight:700">${esc(x.code)}</span><span class="pill ${x.used_by?'no':'ok'}">${x.used_by?'مستعمل':'متاح'}</span></div>`).join('');
-  $('stuList').innerHTML=(s.data||[]).length?s.data.map(x=>`<div class="list-item"><span>👤 ${esc(x.name)}</span><span class="muted">${esc(x.branch)} • ${new Date(x.created_at).toLocaleDateString()}</span></div>`).join(''):'<p class="muted">لا طلبة بعد.</p>';
-  $('askList').innerHTML=(a.data||[]).length?a.data.map(x=>`<div class="list-item" style="align-items:flex-start"><div><b>${esc(x.title)}</b> <span class="muted">— ${nm(x)}</span><p class="muted" style="margin-top:4px">${esc(x.body)}</p></div>${x.answered?'<span class="pill ok">تمت الإجابة</span>':`<button class="btn sm ghost" onclick="answerAsk(${x.id})">✔ جاوبت</button>`}</div>`).join(''):'<p class="muted">لا أسئلة واردة.</p>';
-  $('revAdmList').innerHTML=(r.data||[]).length?r.data.map(x=>`<div class="list-item"><span>🔁 ${esc(x.title)} <span class="muted">(${esc(x.subject)}) — ${nm(x)}</span></span></div>`).join(''):'<p class="muted">لا طلبات مراجعة.</p>';
+  const {data,error,count}=await sb.from('students').select('id,name,branch,track,phone,receipt,created_at',{count:'exact'}).eq('status','pending').order('created_at',{ascending:false}).range(0,PG-1);
+  if(error){toast('⚠️ سجّل الدخول كمشرف (نقر مزدوج على الصورة)');return;}
+  const pend=data||[],urls={};
+  if(pend.length){const {data:su}=await sb.storage.from('receipts').createSignedUrls(pend.map(x=>x.receipt),900);(su||[]).forEach(u=>{if(u.signedUrl)urls[u.path]=u.signedUrl;});}
+  $('codeList').innerHTML=(pend.length?`<p class="muted">الطلبات المعلّقة: ${count}${count>PG?' (يظهر أحدث '+PG+')':''}</p>`+pend.map(x=>`<div class="card" style="margin-bottom:10px"><b>${esc(x.name)}</b> <span class="muted">— ${esc(x.branch)}${x.track?' / '+esc(x.track):''} — 📞 ${esc(x.phone)}</span>${urls[x.receipt]?`<a href="${esc(urls[x.receipt])}" target="_blank" rel="noopener"><img src="${esc(urls[x.receipt])}" alt="وصل الدفع" style="width:100%;max-height:260px;object-fit:contain;margin:8px 0;border-radius:10px"></a>`:'<p class="muted">تعذر عرض الوصل</p>'}<div style="display:flex;gap:8px"><button class="btn sm green" onclick="decide('${x.id}',1)">✅ قبول</button><button class="btn sm red" onclick="decide('${x.id}',0)">❌ رفض</button></div></div>`).join(''):'<p class="muted">لا طلبات جديدة.</p>');
+}
+function stuSearch(){clearTimeout(window._sq);window._sq=setTimeout(()=>{window._stuPg=0;admStudents();},350);}
+function stuPage(d){window._stuPg=Math.max(0,(window._stuPg||0)+d);admStudents();}
+async function admStudents(){
+  const q=(document.getElementById('stuQ').value||'').trim().replace(/[%,()*]/g,''),pg=window._stuPg||0;
+  let r=sb.from('students').select('id,name,branch,track,phone,created_at',{count:'exact'}).neq('status','pending').order('created_at',{ascending:false}).range(pg*PG,pg*PG+PG-1);
+  if(q)r=r.or(`name.ilike.%${q}%,phone.ilike.%${q}%`);
+  const {data,count,error}=await r;
+  if(error){toast('⚠️ '+error.message);return;}
+  document.getElementById('stuList').innerHTML=((data||[]).length?data.map(x=>`<div class="list-item"><span>👤 ${esc(x.name)}</span><span class="muted">${esc(x.branch)}${x.track?' / '+esc(x.track):''} • ${esc(x.phone||'')}</span></div>`).join(''):'<p class="muted">لا نتائج.</p>')+pager(pg,count||0,'stuPage')+'<p class="muted" style="font-size:.8rem">كل جهاز مسجّل يُحسب سطراً.</p>';
+}
+function askPage(d){window._askPg=Math.max(0,(window._askPg||0)+d);admAsks();}
+async function admAsks(){
+  const pg=window._askPg||0,{data,count,error}=await sb.from('asks').select('*, students(name)',{count:'exact'}).order('answered',{ascending:true}).order('created_at',{ascending:false}).range(pg*PG,pg*PG+PG-1);
+  if(error){toast('⚠️ '+error.message);return;}
+  document.getElementById('askList').innerHTML=((data||[]).length?data.map(x=>`<div class="list-item" style="align-items:flex-start"><div><b>${esc(x.title)}</b> <span class="muted">— ${esc(x.students&&x.students.name)}</span><p class="muted" style="margin-top:4px">${esc(x.body)}</p></div>${x.answered?'<span class="pill ok">تمت الإجابة</span>':`<button class="btn sm ghost" onclick="answerAsk(${x.id})">✔ جاوبت</button>`}</div>`).join(''):'<p class="muted">لا أسئلة واردة.</p>')+pager(pg,count||0,'askPage');
+}
+function revPage(d){window._revPg=Math.max(0,(window._revPg||0)+d);admReviews();}
+async function admReviews(){
+  const pg=window._revPg||0,{data,count,error}=await sb.from('reviews').select('*, students(name)',{count:'exact'}).order('created_at',{ascending:false}).range(pg*PG,pg*PG+PG-1);
+  if(error){toast('⚠️ '+error.message);return;}
+  document.getElementById('revAdmList').innerHTML=((data||[]).length?data.map(x=>`<div class="list-item"><span>🔁 ${esc(x.title)} <span class="muted">(${esc(x.subject)}) — ${esc(x.students&&x.students.name)}</span></span></div>`).join(''):'<p class="muted">لا طلبات مراجعة.</p>')+pager(pg,count||0,'revPage');
 }
 async function answerAsk(id){await sb.from('asks').update({answered:true}).eq('id',id);renderAdm();}
-async function genCode(){const c='KAMY-'+Math.random().toString(36).slice(2,8).toUpperCase();const {error}=await sb.from('codes').insert({code:c});if(error){toast('⚠️ '+error.message);return;}renderAdm();toast('🔑 رمز جديد: '+c);}
+async function genCode(){
+  const n=Math.min(200,Math.max(1,parseInt(prompt('كم رمزاً تريد توليده؟','1'),10)||1)),rows=[];
+  for(let i=0;i<n;i++){const a=new Uint32Array(2);crypto.getRandomValues(a);rows.push({code:'KAMY-'+(a[0].toString(36)+a[1].toString(36)).toUpperCase().slice(0,8)});}
+  const {error}=await sb.from('codes').insert(rows);if(error){toast('⚠️ '+error.message);return;}
+  renderAdm();toast('🔑 تم توليد '+n+' رمز');
+}
+async function copyFree(){const t=(window._free||[]).join('\n');try{await navigator.clipboard.writeText(t);toast('📋 تم نسخ '+window._free.length+' رمز');}catch(e){prompt('انسخ الرموز:',t);}}
+async function moreDev(c){const {data}=await sb.from('codes').select('max_devices').eq('code',c).single();await sb.from('codes').update({max_devices:(data&&data.max_devices||1)+1}).eq('code',c);renderAdm();}
 
 /* ---------- Admin: Programs CRUD (بدون كود) ---------- */
 let prB=null,prM=null,prW=null,prD=null;
@@ -734,12 +808,12 @@ function renderBranchAdm(){
     </span></div>`).join('');
 }
 function prOpenBranch(i){prB=Object.keys(PROG)[i];if(!PROG[prB])PROG[prB]={months:[]};document.getElementById('prBranchName').textContent=prB;prGo('months');}
-function prDelBranch(i){const b=Object.keys(PROG)[i];if(confirm('حذف الشعبة؟')){delete PROG[b];saveProgs();renderBranchAdm();}}
+function prDelBranch(i){const b=Object.keys(PROG)[i];if(confirm('حذف الشعبة؟')){delete PROG[b];if(sb)sb.from('program').delete().eq('branch',b).then(()=>{});renderBranchAdm();}}
 function addBranch(){
   const n=document.getElementById('nbName').value.trim();
   if(!n){alert('اكتب اسم الشعبة');return;}
   PROG[n]=PROG[n]||{months:[]};
-  saveProgs();document.getElementById('nbName').value='';renderBranchAdm();toast('✅ تمت إضافة الشعبة');
+  saveProgs(n);document.getElementById('nbName').value='';renderBranchAdm();toast('✅ تمت إضافة الشعبة');
 }
 function renderMonthsAdm(){
   document.getElementById('monthList').innerHTML=(PROG[prB].months||[]).map((m,mi)=>
@@ -788,6 +862,7 @@ function renderDayEditor(){
       <input class="inp" id="ed_${key}_t" value="${esc(sess.t)}" placeholder="عنوان الدرس">
       <textarea class="inp" id="ed_${key}_pts" placeholder="النقاط (كل نقطة في سطر)">${esc((sess.pts||[]).join('\n'))}</textarea>
       <input class="inp" id="ed_${key}_v" value="${esc(sess.video)}" placeholder="رابط فيديو YouTube (اختياري)" style="direction:ltr;text-align:left">
+      <textarea class="inp" id="ed_${key}_res" placeholder="روابط المصادر، سطر لكل رابط: النوع|العنوان|الرابط (النوع: ملخص أو تمارين أو فيديو أو كتاب)" style="direction:ltr;text-align:left">${esc(resToText(sess.res))}</textarea>
     </div>`;
   };
   document.getElementById('dayEditor').innerHTML=`
@@ -806,14 +881,14 @@ function saveDay(){
     {
       d[k].pts=document.getElementById('ed_'+k+'_pts').value.split('\n').map(x=>x.trim()).filter(Boolean);
       d[k].video=document.getElementById('ed_'+k+'_v').value.trim();
+      d[k].res=textToRes(document.getElementById('ed_'+k+'_res').value);
     }
   });
   saveProgs();toast('✅ تم الحفظ — البرنامج محدّث');renderDayEditor();
 }
 
 /* ==================== INIT ==================== */
-if(user&&PROG[user.branch]===undefined&&user.branch){/* branch deleted */}
-if(localStorage.getItem('swk_auth')==='1'&&user){document.getElementById('lock').style.display='none';enterApp();}
+lkShow('form');checkStatus(false);
 </script>
 </body>
 </html>
