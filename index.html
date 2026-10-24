@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#0B0E1B">
 <title>Study with Kamy</title>
 <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
 <style>
@@ -112,6 +113,66 @@ footer{padding:24px 5% 100px;text-align:center;color:var(--gray);font-size:.8rem
 .sess-edit{background:#0f1a30;border:1px solid var(--border);border-radius:12px;padding:14px;margin-bottom:12px}
 #lock{overflow-y:auto;align-items:flex-start!important}#lock .lock-box{margin:24px auto}
 #bottomNav{padding-left:2px;padding-right:2px}#bottomNav a{font-size:.66rem;min-width:0}
+#lock{visibility:hidden}
+
+/* ===== Theme v2: Deep navy + violet/indigo ===== */
+:root{--bg:#0B0E1B;--card:#12162C;--card2:#191F3D;--border:#222849;--blue:#8B5CF6;--indigo:#6366F1;--gold:#FBBF24;--green:#34D399;--purple:#A5B4FC;--red:#F87171;--gray:#9AA3C7;--text:#FFFFFF;--grad:linear-gradient(135deg,#8B5CF6 0%,#6366F1 100%);--shadow:0 8px 28px rgba(0,0,0,.35)}
+html{color-scheme:dark}
+body{background:radial-gradient(900px 420px at 50% -120px,rgba(99,102,241,.22),transparent 70%) no-repeat,var(--bg);line-height:1.6;-webkit-font-smoothing:antialiased}
+::placeholder{color:#6B73A0}
+header{background:rgba(11,14,27,.82);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-bottom:1px solid rgba(255,255,255,.06)}
+.logo .icon,.lock-icon{background:var(--grad);box-shadow:0 8px 24px rgba(139,92,246,.45)}
+.logo em,.lock-box .logo-big span{color:#A78BFA}
+.avatar{background:var(--grad);color:#fff;box-shadow:0 4px 14px rgba(99,102,241,.45)}
+.h-xp{background:rgba(251,191,36,.1);border-color:rgba(251,191,36,.25)}
+#lock{background:radial-gradient(700px 420px at 50% 0,rgba(139,92,246,.28),transparent 70%) no-repeat,var(--bg)}
+.lock-box{background:linear-gradient(180deg,#151A38,#10142B);border:1px solid rgba(139,92,246,.28);border-radius:28px;box-shadow:0 24px 70px rgba(99,102,241,.28);padding:34px 26px}
+.lock-box .logo-big{letter-spacing:-.3px}
+.lock-box input,.inp{background:#0E1226;border:1px solid #262C50;border-radius:14px;color:#fff;letter-spacing:0;text-align:right}
+.lock-box input:focus,.inp:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(139,92,246,.22)}
+.lock-box input[type=file]{padding:10px;text-align:right;color:var(--gray);font-size:.85rem}
+input[type=file]::file-selector-button{background:var(--card2);color:#fff;border:1px solid #2C3361;border-radius:10px;padding:7px 12px;margin-left:10px;font-family:inherit;cursor:pointer}
+.btn{background:var(--grad);border-radius:14px;box-shadow:0 8px 22px rgba(99,102,241,.38);letter-spacing:.2px}
+.btn:hover{background:var(--grad);filter:brightness(1.12)}
+.btn:active{transform:scale(.98)}
+.btn.ghost{background:transparent;box-shadow:none;border:1px solid #2C3361;color:#fff}
+.btn.ghost:hover{background:rgba(139,92,246,.12);filter:none}
+.btn.green{background:linear-gradient(135deg,#10B981,#34D399);color:#052e22;box-shadow:0 6px 18px rgba(52,211,153,.28)}
+.btn.red{background:linear-gradient(135deg,#EF4444,#F87171);box-shadow:0 6px 18px rgba(248,113,113,.25)}
+.card,.stat,.task,.opt,.list-item,.chat-box{background:var(--card);border:1px solid var(--border);box-shadow:var(--shadow)}
+.card{border-radius:22px}
+.task,.opt{border-radius:20px}
+.stat{border-radius:20px}
+.list-item{border-radius:16px}
+.card.hoverable:hover,.task:hover,.opt:hover,.chip:hover{border-color:var(--blue)}
+.sec-title{letter-spacing:-.2px}
+.sec-title .bar{background:var(--grad)}
+.welcome{background:linear-gradient(135deg,rgba(139,92,246,.38),rgba(99,102,241,.18) 55%,rgba(18,22,44,.92));border:1px solid rgba(139,92,246,.32);border-radius:28px;box-shadow:0 18px 50px rgba(99,102,241,.2)}
+.welcome h2 span{color:#C4B5FD}
+.welcome .mot{color:#D6DBF5}
+.cd-box{background:rgba(11,14,27,.55);border:1px solid rgba(255,255,255,.09);border-radius:16px}
+.cd-box b{color:#C4B5FD}
+.xp-v{color:#A5B4FC}
+.task .time{color:#A78BFA}
+.task.done{border-color:rgba(52,211,153,.5)}
+.pts li{color:#CBD2F2}
+.pts li::before{color:#A78BFA}
+.day-tag{background:rgba(139,92,246,.18);color:#C4B5FD}
+.opt.sel{background:rgba(139,92,246,.14);box-shadow:0 0 0 1px var(--blue)}
+.msg.me{background:var(--grad)}
+.msg.ai{background:var(--card2)}
+.weekday{background:var(--card2);border-radius:12px}
+.weekday.on{background:var(--grad);border-color:transparent}
+.pill.ok{background:rgba(52,211,153,.14)}.pill.no{background:rgba(251,191,36,.14)}
+.track,.video-ph{background:#0E1226}
+.toast{background:#191F3D;border-color:var(--blue);box-shadow:var(--shadow)}
+#bottomNav{background:rgba(14,18,38,.9);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-top:1px solid rgba(255,255,255,.07)}
+#bottomNav a{transition:.2s}
+#bottomNav a.on{color:#fff;background:rgba(139,92,246,.2)}
+#bottomNav a.on .i{filter:drop-shadow(0 0 8px rgba(139,92,246,.8))}
+#lock a{color:#A78BFA}
+#tRes{margin-top:14px}
+.video-ph{padding:20px 16px;border:1px dashed #2C3361;border-radius:16px;color:var(--gray)}
 </style>
 </head>
 <body>
@@ -119,7 +180,7 @@ footer{padding:24px 5% 100px;text-align:center;color:var(--gray);font-size:.8rem
 <!-- LOCK -->
 <div id="lock">
   <div class="lock-box">
-    <div class="lock-icon">🔒</div>
+    <div class="lock-icon">🎓</div>
     <div class="logo-big">Study with <span>Kamy</span></div>
     <div id="lkForm">
       <p>منصة خاصة بالمشتركين في برنامج مراجعة البكالوريا الجزائرية.<br>أرسل طلب اشتراكك مع وصل الدفع، وتتم مراجعته.</p>
@@ -128,7 +189,7 @@ footer{padding:24px 5% 100px;text-align:center;color:var(--gray);font-size:.8rem
       <select id="rqBranch" class="inp" onchange="trackFor(this.value)"></select>
       <select id="rqTrack" class="inp hidden"></select>
       <input id="rqPhone" type="tel" inputmode="tel" placeholder="رقم الهاتف" autocomplete="tel">
-      <input id="rqPass" type="password" placeholder="كلمة سر تختارها للدخول لاحقاً (6 أحرف على الأقل)" autocomplete="new-password">
+      <input id="rqPass" type="password" placeholder="كلمة السر (6 أحرف على الأقل)" autocomplete="new-password">
       <p style="text-align:right;margin:0 0 6px;font-size:.85rem">📎 صورة وصل الدفع</p>
       <input id="rqFile" type="file" accept="image/*">
       <button class="btn" id="rqBtn" style="width:100%" onclick="sendRequest()">إرسال الطلب 📩</button>
@@ -193,7 +254,7 @@ footer{padding:24px 5% 100px;text-align:center;color:var(--gray);font-size:.8rem
 
 <!-- Week -->
 <div class="view" id="v-week">
-  <div class="sec-title"><span class="bar"></span> 📅 Weekly Tasks</div>
+  <div class="sec-title"><span class="bar"></span> 📅 مهام الأسبوع</div>
   <div style="display:flex;gap:6px;margin-bottom:16px;flex-wrap:wrap" id="weekNav"></div>
   <div id="weekDays"></div>
 </div>
@@ -276,6 +337,7 @@ footer{padding:24px 5% 100px;text-align:center;color:var(--gray);font-size:.8rem
     <button class="btn sm ghost" id="ab4" onclick="adminTab('asks')">❓ الأسئلة</button>
     <button class="btn sm ghost" id="ab5" onclick="adminTab('review')">🔁 المراجعة</button>
     <button class="btn sm ghost" id="ab6" onclick="adminTab('lib')">📖 المصادر</button>
+    <button class="btn sm red" onclick="adminOut()">🚪 خروج المشرف</button>
   </div>
 
   <!-- Codes -->
@@ -460,6 +522,10 @@ async function sendRequest(){
 async function checkStatus(manual){
   if(!sb)return false;
   const {data:{session}}=await sb.auth.getSession();if(!session){lkShow('form');return false;}
+  if(session.user.is_anonymous!==true){
+    const {data:adm}=await sb.from('admins').select('user_id').maybeSingle();
+    if(adm){window._isAdmin=true;await adminEnter();return true;}
+  }
   const {data:me}=await sb.from('students').select('name,branch,status,track').eq('id',session.user.id).maybeSingle();
   if(!me){lkShow('form');return false;}
   if(me.status==='approved'){user={name:me.name,branch:me.branch,track:me.track,at:new Date().toISOString()};store.set('swk_user',user);localStorage.setItem('swk_auth','1');clearInterval(window._poll);document.getElementById('lock').style.display='none';enterApp();return true;}
@@ -483,6 +549,7 @@ async function adminLogin(){
   const {data}=await sb.from('admins').select('user_id').maybeSingle();if(!data){alert('هذا الحساب ليس مشرفاً');return false;}
   window._isAdmin=true;return true;
 }
+async function adminOut(){if(!confirm('تسجيل خروج المشرف من هذا المتصفح؟'))return;try{await sb.auth.signOut();}catch(e){}localStorage.removeItem('swk_user');localStorage.removeItem('swk_auth');location.reload();}
 async function adminEnter(){if(!await adminLogin())return;user={name:'المشرف',branch:'علوم تجريبية'};await loadAllPrograms();document.getElementById('lock').style.display='none';await enterApp();show('admin');adminTab('codes');}
 async function decide(id,ok){if(ok)await sb.from('students').update({status:'approved'}).eq('id',id);else if(confirm('رفض هذا الطلب وحذفه؟'))await sb.from('students').delete().eq('id',id);renderAdm();}
 
@@ -761,11 +828,19 @@ function stuSearch(){clearTimeout(window._sq);window._sq=setTimeout(()=>{window.
 function stuPage(d){window._stuPg=Math.max(0,(window._stuPg||0)+d);admStudents();}
 async function admStudents(){
   const q=(document.getElementById('stuQ').value||'').trim().replace(/[%,()*]/g,''),pg=window._stuPg||0;
-  let r=sb.from('students').select('id,name,branch,track,phone,created_at',{count:'exact'}).neq('status','pending').order('created_at',{ascending:false}).range(pg*PG,pg*PG+PG-1);
-  if(q)r=r.or(`name.ilike.%${q}%,phone.ilike.%${q}%`);
-  const {data,count,error}=await r;
+  const {data,error}=await sb.rpc('admin_students',{p_q:q,p_off:pg*PG,p_lim:PG});
   if(error){toast('⚠️ '+error.message);return;}
-  document.getElementById('stuList').innerHTML=((data||[]).length?data.map(x=>`<div class="list-item"><span>👤 ${esc(x.name)}</span><span class="muted">${esc(x.branch)}${x.track?' / '+esc(x.track):''} • ${esc(x.phone||'')}</span></div>`).join(''):'<p class="muted">لا نتائج.</p>')+pager(pg,count||0,'stuPage')+'<p class="muted" style="font-size:.8rem">كل جهاز مسجّل يُحسب سطراً.</p>';
+  if(!(data||[]).length&&pg>0){window._stuPg=pg-1;return admStudents();}
+  const count=data&&data.length?Number(data[0].total):0;window._stu=data||[];
+  document.getElementById('stuList').innerHTML=((data||[]).length?data.map((x,i)=>`<div class="list-item"><span>👤 ${esc(x.name)} <span class="muted">(${x.devices} جهاز)</span></span><span style="display:flex;gap:8px;align-items:center"><span class="muted">${esc(x.branch)}${x.track?' / '+esc(x.track):''} • ${esc(x.phone||'')}</span><button class="btn sm red" onclick="delStudent(${i})">🗑</button></span></div>`).join(''):'<p class="muted">لا نتائج.</p>')+pager(pg,count,'stuPage');
+}
+async function delStudent(i){
+  const x=(window._stu||[])[i];if(!x)return;
+  if(!confirm('حذف الطالب «'+x.name+'» نهائياً؟\n\nسيُحذف حسابه (على كل أجهزته) وأسئلته وطلبات مراجعته ووصل الدفع، ويفقد الدخول فوراً. لا يمكن التراجع.'))return;
+  try{if((x.receipts||[]).length)await sb.storage.from('receipts').remove(x.receipts);}catch(e){}
+  const {error}=await sb.from('students').delete().in('id',x.ids);
+  if(error){toast('⚠️ '+error.message);return;}
+  toast('🗑 تم حذف الطالب');admStudents();
 }
 function askPage(d){window._askPg=Math.max(0,(window._askPg||0)+d);admAsks();}
 async function admAsks(){
@@ -888,7 +963,9 @@ function saveDay(){
 }
 
 /* ==================== INIT ==================== */
-lkShow('form');checkStatus(false);
+lkShow('form');
+checkStatus(false).catch(()=>{}).then(()=>{document.getElementById('lock').style.visibility='visible';});
+setTimeout(()=>{document.getElementById('lock').style.visibility='visible';},4000);
 </script>
 </body>
 </html>
