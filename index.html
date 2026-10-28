@@ -270,7 +270,7 @@ input[type=file]::file-selector-button{background:var(--card2);color:#fff;border
     <ul class="pts" id="tPts"></ul>
     <div id="tRes"></div>
     <div id="tVideo"><div class="video-ph">🎬 فيديو الدرس — يُضاف من لوحة تحكم Kamy</div></div>
-    <div class="video-ph">📝 تطبيق Bac جزائري مرتبط بهذا الدرس — قريباً</div>
+    <div id="tBac"></div>
     <button class="btn green" style="width:100%;padding:13px;margin-top:14px" id="tDoneBtn" onclick="taskDone()">✔ تم — أنهيت المهمة</button>
     <button class="btn ghost" style="width:100%;margin-top:8px" onclick="askReview()">🔁 ما فهمتش — راجع هذا الدرس</button>
     <button class="btn ghost" style="width:100%;margin-top:8px" onclick="show('ask')">❓ اطرح سؤالاً خاصاً على Kamy</button>
@@ -314,11 +314,11 @@ input[type=file]::file-selector-button{background:var(--card2);color:#fff;border
   <div class="chat-box">
     <div class="chat-log" id="chatLog"></div>
     <div style="padding:0 12px 8px">
-      <button class="chip" onclick="askAI('ما أهم شيء في درس اليوم؟')">أهم نقاط درس اليوم ⭐</button>
-      <button class="chip" onclick="askAI('ما فهمتش')">ما فهمتش 🔄</button>
-      <button class="chip" onclick="askAI('أعطني سؤالاً مشابهاً')">سؤال مشابه 📝</button>
-      <button class="chip" onclick="askAI('نصيحة للباك')">نصيحة 🎯</button>
-      <button class="chip" onclick="askAI('حلل تقدمي')">حلل تقدمي 📈</button>
+      <button class="chip" onclick="askAI('لخّص لي أهم نقاط درس اليوم')">أهم نقاط درس اليوم ⭐</button>
+      <button class="chip" onclick="askAI('ما فهمتش درس اليوم، اشرحه لي ببساطة وبمثال')">ما فهمتش 🔄</button>
+      <button class="chip" onclick="askAI('أعطني سؤالاً مشابهاً لأسئلة البكالوريا على درس اليوم، دون الحل حتى أحاول')">سؤال مشابه 📝</button>
+      <button class="chip" onclick="askAI('أعطني نصيحة عملية للمراجعة اليوم')">نصيحة 🎯</button>
+      <button class="chip" onclick="askAI('حلل تقدمي واقترح علي ماذا أفعل اليوم')">حلل تقدمي 📈</button>
     </div>
     <div class="chat-input">
       <input class="inp" id="aiInput" placeholder="اسأل عن الدرس..." onkeydown="if(event.key==='Enter')askAI()">
@@ -426,6 +426,14 @@ input[type=file]::file-selector-button{background:var(--card2);color:#fff;border
       <button class="btn green" style="width:100%" onclick="addRes()">إضافة</button>
       <p class="muted" style="margin-top:8px;font-size:.8rem">ضع رابط الملف من Google Drive أو Telegram أو غيرهما. ولربط مصدر بدرس معين افتح اليوم في تبويب البرامج.</p>
     </div>
+    <div class="card" style="margin-bottom:14px">
+      <h4 style="margin-bottom:10px">📥 استيراد جماعي (فيديوهات أو تمارين بكالوريا)</h4>
+      <select class="inp" id="imType"><option value="video">فيديوهات يوتيوب</option><option value="bac">تمارين بكالوريا</option></select>
+      <select class="inp" id="imBranch"></select>
+      <textarea class="inp" id="imText" rows="6" style="direction:ltr;text-align:left" placeholder="فيديو، سطر لكل درس:&#10;جزء من عنوان الدرس|رابط يوتيوب&#10;&#10;باك:&#10;جزء من عنوان الدرس|المصدر|عنوان التمرين|رابط التمرين|رابط التصحيح"></textarea>
+      <button class="btn" style="width:100%" onclick="runImport()">استيراد</button>
+      <div id="imLog"></div>
+    </div>
     <div class="card"><div id="lbList"></div></div>
   </div>
 </div>
@@ -471,6 +479,32 @@ async function saveProgs(b){b=b||prB;if(!sb||!b||!PROG[b])return;const {error}=a
 const TRACKS={'تقني رياضي':['ميكانيك','مدنية','طرائق','كهرباء'],'لغات أجنبية':['ألمانية','إسبانية','إيطالية']};
 function trackFor(b){const s=document.getElementById('rqTrack'),t=TRACKS[b];if(!t){s.classList.add('hidden');s.innerHTML='';return;}s.innerHTML='<option value="">'+(b==='تقني رياضي'?'اختر تخصصك':'اختر لغتك الأجنبية الثالثة')+'</option>'+t.map(x=>`<option>${x}</option>`).join('');s.classList.remove('hidden');}
 function adaptTrack(){const p=PROG[user&&user.branch],t=user&&user.track;if(!p||!t)return;p.months.forEach(m=>m.weeks.forEach(w=>w.days.forEach(d=>{const x=d.pm;if(x&&x.s==='هندسة'&&Array.isArray(x.pts)){const l=x.pts.filter(q=>q.startsWith(t+':'));if(l.length){x.t='هندسة — '+t;x.pts=l.map(q=>q.slice(t.length+1).trim());}}})));}
+const bacTag=x=>/^بكالوريا/.test(x||'')?'🟢':/كتاب/.test(x||'')?'🔵':/مولّد|مولد|ذكاء/.test(x||'')?'🟡':'⚪';
+const bacToText=l=>(l||[]).map(b=>[b.s,b.t,b.u,b.a||''].join('|')).join('\n');
+const textToBac=t=>t.split('\n').map(l=>l.split('|').map(x=>x.trim())).filter(a=>a.length>=3&&a[0]&&okUrl(a[2])).map(a=>{const o={s:a[0],t:a[1]||a[0],u:a[2]};if(a[3]&&okUrl(a[3]))o.a=a[3];return o;});
+const ytSearch=x=>'https://www.youtube.com/results?search_query='+encodeURIComponent(x.s+' '+x.t+' بكالوريا الجزائر');
+const bacSearch=x=>'https://www.google.com/search?q='+encodeURIComponent('تمرين بكالوريا '+x.s+' '+x.t+' الجزائر مع التصحيح');
+function renderBac(x){
+  const box=document.getElementById('tBac'),l=(x.bac||[]).filter(b=>okUrl(b.u));window._bacCur=l;
+  box.innerHTML=l.length?'<div class="sec-title" style="margin:16px 0 8px"><span class="bar"></span> 📝 تطبيق Bac</div>'+l.map((b,i)=>`<div class="card" style="margin-bottom:10px"><b>${bacTag(b.s)} ${esc(b.s)}</b><p class="muted" style="margin:6px 0 10px">${esc(b.t)}</p><a class="btn sm" style="display:inline-block" href="${esc(b.u)}" target="_blank" rel="noopener noreferrer">📄 فتح التمرين</a>${b.a?`<div id="bacSol${i}" style="margin-top:10px"><button class="btn sm ghost" onclick="showSol(${i})">✅ حاولت الحل — أظهر التصحيح</button></div>`:''}</div>`).join(''):`<div class="video-ph">📝 لا تمرين بكالوريا مخصص لهذا الدرس بعد<br><a class="btn sm ghost" style="margin-top:10px;display:inline-block" href="${esc(bacSearch(x))}" target="_blank" rel="noopener noreferrer">🔎 ابحث عن تمرين بكالوريا</a></div>`;
+}
+function showSol(i){const b=(window._bacCur||[])[i];if(!b||!b.a)return;document.getElementById('bacSol'+i).innerHTML=`<a class="btn sm green" style="display:inline-block" href="${esc(b.a)}" target="_blank" rel="noopener noreferrer">📘 التصحيح النموذجي</a>`;}
+async function runImport(){
+  const g=id=>document.getElementById(id).value,type=g('imType'),branch=g('imBranch'),p=PROG[branch];
+  if(!p){toast('⚠️ اختر شعبة لها برنامج');return;}
+  const lines=g('imText').split('\n').map(l=>l.trim()).filter(Boolean),touched=new Set(),miss=[];
+  lines.forEach(l=>{
+    const a=l.split('|').map(x=>x.trim()),needle=a[0];let hit=0;
+    p.months.forEach(m=>m.weeks.forEach(w=>w.days.forEach(d=>['am','pm'].forEach(k=>{
+      const x=d[k];if(!needle||!x.t.includes(needle))return;
+      if(type==='video'){if(okUrl(a[1])){x.video=a[1];hit++;touched.add(x);}}
+      else if(a.length>=4&&okUrl(a[3])){const o={s:a[1],t:a[2],u:a[3]};if(a[4]&&okUrl(a[4]))o.a=a[4];x.bac=(x.bac||[]).filter(y=>y.u!==o.u).concat([o]);hit++;touched.add(x);}
+    }))));
+    if(!hit)miss.push(l);
+  });
+  await saveProgs(branch);
+  document.getElementById('imLog').innerHTML=`<p style="color:var(--green);font-weight:700;margin-top:10px">✅ حُدّثت ${touched.size} حصة</p>`+(miss.length?`<p class="muted">لم تُطابق ${miss.length} سطراً (راجع نص العنوان أو الرابط):</p>`+miss.map(x=>`<p class="muted" style="direction:ltr;text-align:left;word-break:break-all">${esc(x)}</p>`).join(''):'');
+}
 const RK={'ملخص':'📄','تمارين':'✏️','فيديو':'🎬','كتاب':'📘','أخرى':'🔗'};
 const okUrl=u=>/^https?:\/\//i.test(u||'');
 function resHTML(list){return (list||[]).filter(r=>okUrl(r.u)).map(r=>`<a class="btn sm ghost" style="margin:6px 0 0 6px;display:inline-block" href="${esc(r.u)}" target="_blank" rel="noopener noreferrer">${RK[r.k]||'🔗'} ${esc(r.t||r.k)}</a>`).join('');}
@@ -526,9 +560,9 @@ async function checkStatus(manual){
     const {data:adm}=await sb.from('admins').select('user_id').maybeSingle();
     if(adm){window._isAdmin=true;await adminEnter();return true;}
   }
-  const {data:me}=await sb.from('students').select('name,branch,status,track').eq('id',session.user.id).maybeSingle();
+  const {data:me}=await sb.from('students').select('name,branch,status,track,phone').eq('id',session.user.id).maybeSingle();
   if(!me){lkShow('form');return false;}
-  if(me.status==='approved'){user={name:me.name,branch:me.branch,track:me.track,at:new Date().toISOString()};store.set('swk_user',user);localStorage.setItem('swk_auth','1');clearInterval(window._poll);document.getElementById('lock').style.display='none';enterApp();return true;}
+  if(me.status==='approved'){user={name:me.name,branch:me.branch,track:me.track,phone:me.phone,at:new Date().toISOString()};store.set('swk_user',user);localStorage.setItem('swk_auth','1');clearInterval(window._poll);document.getElementById('lock').style.display='none';enterApp();return true;}
   lkShow('pending');if(manual)lkErr('⏳ طلبك ما زال قيد المراجعة');return false;
 }
 async function loginPhone(){
@@ -538,7 +572,7 @@ async function loginPhone(){
   try{
     await ensureSession();const {data:r,error}=await sb.rpc('login_phone',{p_phone:ph,p_pass:pw});if(error)throw error;
     if(r&&r.error){lkErr({bad_login:'❌ رقم الهاتف أو كلمة السر غير صحيحة',too_many:'⛔ محاولات كثيرة، انتظر 15 دقيقة',device_limit:'⛔ وصل حسابك لعدد الأجهزة المسموح. تواصل مع Kamy.',already_registered:'⚠️ هذا المتصفح مسجّل بحساب آخر',pending:'⏳ طلبك ما زال قيد المراجعة'}[r.error]||'⚠️ '+r.error);return;}
-    user={name:r.name,branch:r.branch,track:r.track,at:new Date().toISOString()};store.set('swk_user',user);localStorage.setItem('swk_auth','1');
+    user={name:r.name,branch:r.branch,track:r.track,phone:ph,at:new Date().toISOString()};store.set('swk_user',user);localStorage.setItem('swk_auth','1');
     document.getElementById('lock').style.display='none';enterApp();
   }catch(e){lkErr('⚠️ '+(e.message||e));}
 }
@@ -598,7 +632,29 @@ async function setStart(){
   user.start=s;if(!window._isAdmin)store.set('swk_user',user);
   START_DATE=new Date(s);
 }
+function mark(){
+  if(!user||window._isAdmin)return;
+  let w=document.getElementById('wm');
+  const txt=(user.name||'')+' · '+(user.phone||'')+' · '+new Date().toLocaleDateString('en-GB'),
+        x=txt.replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+  const svg='<svg xmlns="http://www.w3.org/2000/svg" width="280" height="170"><text transform="rotate(-25 140 85)" x="14" y="92" font-family="sans-serif" font-size="15" fill="rgba(255,255,255,0.13)">'+x+'</text></svg>';
+  if(!w){w=document.createElement('div');w.id='wm';document.body.appendChild(w);}
+  w.setAttribute('style','position:fixed;inset:0;z-index:2147483000;pointer-events:none;background-image:url("data:image/svg+xml,'+encodeURIComponent(svg)+'");background-repeat:repeat');
+}
+function startShield(){
+  if(window._shield)return;window._shield=true;
+  const css=document.createElement('style');
+  css.textContent='body{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}input,textarea,select{-webkit-user-select:text;user-select:text}img{-webkit-user-drag:none}@media print{body{display:none!important}}';
+  document.head.appendChild(css);
+  const inField=e=>/^(INPUT|TEXTAREA|SELECT)$/.test((e.target&&e.target.tagName)||'');
+  ['contextmenu','copy','cut','dragstart','selectstart'].forEach(ev=>document.addEventListener(ev,e=>{if(!inField(e))e.preventDefault();},true));
+  document.addEventListener('keydown',e=>{const k=(e.key||'').toLowerCase();if(((e.ctrlKey||e.metaKey)&&['p','s','u'].includes(k))||k==='f12')e.preventDefault();});
+  document.addEventListener('keyup',e=>{if(e.key==='PrintScreen'){try{navigator.clipboard.writeText(' ');}catch(_){}document.body.style.visibility='hidden';setTimeout(()=>{document.body.style.visibility='';},1500);}});
+  document.addEventListener('visibilitychange',()=>{const a=document.getElementById('app');if(a)a.style.filter=document.hidden?'blur(22px)':'';});
+  mark();setInterval(mark,3000);
+}
 async function enterApp(){
+  if(!window._isAdmin)startShield();
   document.getElementById('app').classList.remove('hidden');
   document.getElementById('hAvatar').textContent=user.name[0];
   document.getElementById('wName').textContent=user.name;
@@ -618,6 +674,7 @@ async function renderLib(){
 }
 function libPick(b){window._libSub=b.dataset.s;renderLib();}
 async function renderLibAdm(){
+  {const ib=document.getElementById('imBranch');if(ib&&ib.options.length<1)ib.innerHTML=Object.keys(PROG).filter(b=>PROG[b]).map(b=>`<option>${esc(b)}</option>`).join('');}
   const sel=document.getElementById('lbBranch');if(sel.options.length<2)sel.innerHTML='<option value="">كل الشعب</option>'+Object.keys(PROG).map(b=>`<option>${esc(b)}</option>`).join('');
   const {data,error}=await sb.from('resources').select('*').order('created_at',{ascending:false});
   document.getElementById('lbList').innerHTML=error?'<p class="muted">⚠️ '+esc(error.message)+'</p>':((data||[]).map(r=>`<div class="list-item" style="align-items:flex-start"><div><b>${RK[r.kind]||'🔗'} ${esc(r.title)}</b><p class="muted">${esc(r.branch||'كل الشعب')}${r.track?' • '+esc(r.track):''} • ${esc(r.subject)}${r.lesson?' • '+esc(r.lesson):''}</p></div><button class="btn sm red" onclick="delRes(${r.id})">حذف</button></div>`).join('')||'<p class="muted">لا مصادر بعد.</p>');
@@ -716,7 +773,8 @@ function openTask(idx,label){
   document.getElementById('tRes').innerHTML=resHTML(sess.res);
   const vid=(sess.video||'').trim(),ym=vid.match(/(?:youtu\.be\/|v=|embed\/)([\w-]{11})/);
   const vsrc=ym?'https://www.youtube.com/embed/'+ym[1]:(/^https:\/\//i.test(vid)?vid:'');
-  document.getElementById('tVideo').innerHTML=vsrc?`<div class="video-frame"><iframe src="${esc(vsrc)}" allowfullscreen></iframe></div>`:'<div class="video-ph">🎬 فيديو الدرس — يُضاف من لوحة تحكم Kamy</div>';
+  document.getElementById('tVideo').innerHTML=vsrc?`<div class="video-frame"><iframe src="${esc(vsrc)}" allowfullscreen></iframe></div>`:`<div class="video-ph">🎬 لا فيديو مخصص لهذا الدرس بعد<br><a class="btn sm ghost" style="margin-top:10px;display:inline-block" href="${esc(ytSearch(sess))}" target="_blank" rel="noopener noreferrer">🔎 ابحث عن شرحه في يوتيوب</a></div>`;
+  renderBac(sess);
   const done=S.done.includes(idx+label);
   const b=document.getElementById('tDoneBtn');
   b.disabled=done;b.textContent=done?'✅ تم إنجازها':'✔ تم — أنهيت المهمة';
@@ -779,11 +837,8 @@ function renderStats(){
 }
 
 /* ---------- AI ---------- */
-function aiSay(t,me=false){const log=document.getElementById('chatLog');log.innerHTML+=`<div class="msg ${me?'me':'ai'}">${me?esc(t):t}</div>`;log.scrollTop=log.scrollHeight;}
-function askAI(preset){
-  const q=(preset||document.getElementById('aiInput').value).trim();if(!q)return;
-  document.getElementById('aiInput').value='';aiSay(q,true);
-  setTimeout(()=>{
+function aiSay(t,me=false){const log=document.getElementById('chatLog'),el=document.createElement('div');el.className='msg '+(me?'me':'ai');el.innerHTML=me?esc(t):t;log.appendChild(el);log.scrollTop=log.scrollHeight;return el;}
+function localReply(q){
     const d=PROG[user.branch]?flatDays()[todayIdx()-1]:null;
     let r;
     if(q.includes('فهمتش')&&d){
@@ -800,8 +855,33 @@ function askAI(preset){
     }else{
       r=`أنا مساعدك الذكي 📚<br>جرّب: "أهم نقاط درس اليوم"، "ما فهمتش"، "أعطني سؤالاً مشابهاً"، "حلل تقدمي"، "نصيحة للباك"`;
     }
-    aiSay(r);
-  },500);
+    return r;
+}
+const mdHTML=t=>esc(t).replace(/\*\*(.+?)\*\*/g,'<b>$1</b>').replace(/^\s*[\*\-]\s+/gm,'• ').replace(/\n/g,'<br>');
+function aiContext(){
+  const p=PROG[user.branch];let c='الشعبة: '+user.branch+(user.track?' ('+user.track+')':'')+'\n';
+  if(p){const all=flatDays(),fd=all[todayIdx()-1];
+    if(fd){const a=fd.d.am,b=fd.d.pm;c+='درس الحصة الصباحية: '+a.s+' — '+a.t+'\nدرس الحصة المسائية: '+b.s+' — '+b.t+'\nنقاط الدرس: '+(b.pts||[]).join('؛ ')+'\n';}
+    c+='تقدم التلميذ: '+S.done.length+' من '+(all.length*2)+' مهمة، أيام متتالية: '+S.streak+'، دروس للمراجعة: '+S.review.length;}
+  return c;
+}
+window._chat=[];window._aiBusy=false;
+async function askAI(preset){
+  const inp=document.getElementById('aiInput'),q=(preset||inp.value).trim();if(!q||window._aiBusy)return;
+  inp.value='';aiSay(q,true);
+  if(!sb||!user||window._isAdmin){aiSay(localReply(q));return;}
+  window._aiBusy=true;const el=aiSay('<span class="muted">… جاري التفكير</span>');
+  window._chat.push({role:'user',text:q});
+  let reply=null,note='';
+  try{
+    const {data,error}=await sb.functions.invoke('assistant',{body:{messages:window._chat.slice(-8),context:aiContext()}});
+    if(error){const st=error.context&&error.context.status;if(st===429)note='limit';else if(st===401||st===403)note='auth';}
+    else if(data&&data.text)reply=data.text;
+  }catch(e){}
+  window._aiBusy=false;
+  if(reply){window._chat.push({role:'model',text:reply});el.innerHTML=mdHTML(reply);}
+  else{window._chat.pop();el.innerHTML=note==='limit'?'⏳ وصلت للحد اليومي من أسئلة المساعد. جرّب غداً، أو اطرح سؤالاً خاصاً على Kamy.':note==='auth'?'🔒 سجّل الدخول من جديد ثم أعد المحاولة.':localReply(q);}
+  document.getElementById('chatLog').scrollTop=1e9;
 }
 
 /* ==================== ADMIN ==================== */
@@ -938,6 +1018,7 @@ function renderDayEditor(){
       <textarea class="inp" id="ed_${key}_pts" placeholder="النقاط (كل نقطة في سطر)">${esc((sess.pts||[]).join('\n'))}</textarea>
       <input class="inp" id="ed_${key}_v" value="${esc(sess.video)}" placeholder="رابط فيديو YouTube (اختياري)" style="direction:ltr;text-align:left">
       <textarea class="inp" id="ed_${key}_res" placeholder="روابط المصادر، سطر لكل رابط: النوع|العنوان|الرابط (النوع: ملخص أو تمارين أو فيديو أو كتاب)" style="direction:ltr;text-align:left">${esc(resToText(sess.res))}</textarea>
+      <textarea class="inp" id="ed_${key}_bac" placeholder="تمارين الباك، سطر لكل تمرين: المصدر|العنوان|رابط التمرين|رابط التصحيح (اختياري). مثال: بكالوريا 2023|الموضوع 2 التمرين 1|https://..." style="direction:ltr;text-align:left">${esc(bacToText(sess.bac))}</textarea>
     </div>`;
   };
   document.getElementById('dayEditor').innerHTML=`
@@ -957,6 +1038,7 @@ function saveDay(){
       d[k].pts=document.getElementById('ed_'+k+'_pts').value.split('\n').map(x=>x.trim()).filter(Boolean);
       d[k].video=document.getElementById('ed_'+k+'_v').value.trim();
       d[k].res=textToRes(document.getElementById('ed_'+k+'_res').value);
+      d[k].bac=textToBac(document.getElementById('ed_'+k+'_bac').value);
     }
   });
   saveProgs();toast('✅ تم الحفظ — البرنامج محدّث');renderDayEditor();
