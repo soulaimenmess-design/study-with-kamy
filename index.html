@@ -173,6 +173,7 @@ input[type=file]::file-selector-button{background:var(--card2);color:#fff;border
 #lock a{color:#A78BFA}
 #tRes{margin-top:14px}
 .video-ph{padding:20px 16px;border:1px dashed #2C3361;border-radius:16px;color:var(--gray)}
+#bottomNav a{position:relative}#bottomNav a.has-new::after{content:"";position:absolute;top:8px;right:28%;width:10px;height:10px;border-radius:50%;background:#F87171;box-shadow:0 0 0 2px #0E1226}
 </style>
 </head>
 <body>
@@ -286,8 +287,11 @@ input[type=file]::file-selector-button{background:var(--card2);color:#fff;border
 
 <!-- Ask -->
 <div class="view" id="v-ask">
-  <div class="sec-title"><span class="bar"></span> ❓ سؤال خاص (Private)</div>
-  <p class="muted" style="margin-bottom:14px">سؤالك يوصل لKamy فقط — ماشي visible للتلاميذ الآخرين.</p>
+  <div class="sec-title"><span class="bar"></span> 📢 قناة شعبتي</div>
+  <p class="muted" style="margin-bottom:12px">رسائل من Kamy لشعبتك. للقراءة فقط.</p>
+  <div id="chanBox" style="margin-bottom:24px"></div>
+  <div class="sec-title"><span class="bar"></span> ❓ سؤال خاص</div>
+  <p class="muted" style="margin-bottom:14px">سؤالك يصل إلى Kamy فقط، وجوابه يظهر لك هنا.</p>
   <div class="card">
     <input class="inp" id="askTitle" placeholder="عنوان السؤال">
     <textarea class="inp" id="askText" placeholder="اكتب سؤالك بالتفصيل..."></textarea>
@@ -337,6 +341,7 @@ input[type=file]::file-selector-button{background:var(--card2);color:#fff;border
     <button class="btn sm ghost" id="ab4" onclick="adminTab('asks')">❓ الأسئلة</button>
     <button class="btn sm ghost" id="ab5" onclick="adminTab('review')">🔁 المراجعة</button>
     <button class="btn sm ghost" id="ab6" onclick="adminTab('lib')">📖 المصادر</button>
+    <button class="btn sm ghost" id="ab7" onclick="adminTab('chan')">📢 القناة</button>
     <button class="btn sm red" onclick="adminOut()">🚪 خروج المشرف</button>
   </div>
 
@@ -413,6 +418,15 @@ input[type=file]::file-selector-button{background:var(--card2);color:#fff;border
   <div id="ad-students" class="hidden"><div class="card"><input class="inp" id="stuQ" placeholder="🔎 بحث بالاسم أو رقم الهاتف" oninput="stuSearch()"><div id="stuList"></div></div></div>
   <div id="ad-asks" class="hidden"><div class="card"><div id="askList"></div></div></div>
   <div id="ad-review" class="hidden"><div class="card"><div id="revAdmList"></div></div></div>
+  <div id="ad-chan" class="hidden">
+    <div class="card" style="margin-bottom:14px">
+      <h4 style="margin-bottom:10px">📢 رسالة إلى قناة شعبة (للقراءة فقط عند التلاميذ)</h4>
+      <select class="inp" id="chBranch"></select>
+      <textarea class="inp" id="chText" rows="4" placeholder="اكتب الرسالة (يمكنك وضع روابط)..."></textarea>
+      <button class="btn" style="width:100%" onclick="postChan()">📤 نشر</button>
+    </div>
+    <div class="card"><div id="chList"></div></div>
+  </div>
   <div id="ad-lib" class="hidden">
     <div class="card" style="margin-bottom:14px">
       <h4 style="margin-bottom:10px">➕ إضافة مصدر (ملخص، تمارين، فيديو، كتاب)</h4>
@@ -449,7 +463,7 @@ input[type=file]::file-selector-button{background:var(--card2);color:#fff;border
   <a data-v="week" onclick="show('week')"><span class="i">📅</span>الأسبوع</a>
   <a data-v="lib" onclick="show('lib')"><span class="i">📚</span>المكتبة</a>
   <a data-v="review" onclick="show('review')"><span class="i">🔁</span>مراجعة</a>
-  <a data-v="ask" onclick="show('ask')"><span class="i">❓</span>سؤال</a>
+  <a data-v="ask" onclick="show('ask')"><span class="i">💬</span>رسائل</a>
   <a data-v="stats" onclick="show('stats')"><span class="i">📊</span>تقدمي</a>
   <a data-v="ai" onclick="show('ai')"><span class="i">🤖</span>المساعد</a>
 </nav>
@@ -635,7 +649,7 @@ async function setStart(){
 function mark(){
   if(!user||window._isAdmin)return;
   let w=document.getElementById('wm');
-  const txt=(user.name||'')+' · '+(user.phone||'')+' · '+new Date().toLocaleDateString('en-GB'),
+  const txt='Study with Kamy',
         x=txt.replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
   const svg='<svg xmlns="http://www.w3.org/2000/svg" width="280" height="170"><text transform="rotate(-25 140 85)" x="14" y="92" font-family="sans-serif" font-size="15" fill="rgba(255,255,255,0.13)">'+x+'</text></svg>';
   if(!w){w=document.createElement('div');w.id='wm';document.body.appendChild(w);}
@@ -661,7 +675,7 @@ async function enterApp(){
   const MOTS=['النجاح هو مجموع الجهود الصغيرة المتكررة كل يوم 💪','ما كاينش مستحيل، كاين غير "مازال ما بديتش" 🚀','كل مهمة كتكملها اليوم، هي نقطة كتربحيها فالباك 🎯','الاستمرارية تغلب الحماس — ركز على اليوم ديالك فقط 📅'];
   document.getElementById('wMot').textContent=MOTS[new Date().getDate()%MOTS.length];
   if(!window._cdT)window._cdT=setInterval(renderCD,60000);
-  await loadMyProgram();await setStart();renderAll();
+  await loadMyProgram();await setStart();renderAll();checkChan();
 }
 async function renderLib(){
   const box=document.getElementById('libList'),chips=document.getElementById('libChips'),items=[],p=PROG[user.branch];
@@ -690,7 +704,7 @@ function show(v){
   document.querySelectorAll('.view').forEach(x=>x.classList.remove('active'));
   document.getElementById('v-'+v).classList.add('active');
   document.querySelectorAll('#bottomNav a').forEach(a=>a.classList.toggle('on',a.dataset.v===v));
-  if(v==='lib')renderLib();if(v==='week')renderWeek();if(v==='stats')renderStats();if(v==='review')renderReview();if(v==='ask')renderMyAsks();
+  if(v==='lib')renderLib();if(v==='week')renderWeek();if(v==='stats')renderStats();if(v==='review')renderReview();if(v==='ask'){renderChannel();renderMyAsks();}
   window.scrollTo(0,0);
 }
 function toast(t){const el=document.getElementById('toast');el.textContent=t;el.style.display='block';setTimeout(()=>el.style.display='none',2600);}
@@ -812,10 +826,27 @@ async function sendAsk(){
   document.getElementById('askTitle').value='';document.getElementById('askText').value='';
   toast('📩 وصل سؤالك لKamy — غادي تجاوبك قريباً');renderMyAsks();
 }
+const linkify=h=>h.replace(/(https?:\/\/[^\s<]+)/g,'<a href="$1" target="_blank" rel="noopener noreferrer" style="color:#A78BFA;text-decoration:underline;word-break:break-all">$1</a>');
+const fmtT=t=>{try{return new Date(t).toLocaleString('ar-DZ',{dateStyle:'short',timeStyle:'short'});}catch(e){return '';}};
+function setBadge(on){const a=document.querySelector('#bottomNav a[data-v="ask"]');if(a)a.classList.toggle('has-new',!!on);}
+async function checkChan(){
+  if(!sb||window._isAdmin)return;
+  try{const {data}=await sb.from('channel_posts').select('created_at').order('created_at',{ascending:false}).limit(1);
+    const t=data&&data[0]&&data[0].created_at,seen=localStorage.getItem('swk_chan_seen');
+    if(t&&(!seen||new Date(t)>new Date(seen)))setBadge(true);}catch(e){}
+}
+async function renderChannel(){
+  const box=document.getElementById('chanBox');if(!sb||!box)return;
+  const {data,error}=await sb.from('channel_posts').select('*').order('created_at',{ascending:false}).limit(30);
+  if(error)return;const rows=data||[];
+  box.innerHTML=rows.length?rows.map(r=>`<div class="card" style="margin-bottom:10px"><p style="white-space:pre-wrap">${linkify(esc(r.body))}</p><p class="muted" style="margin-top:8px;font-size:.78rem">📢 Kamy • ${esc(fmtT(r.created_at))}${r.branch?'':' • لكل الشعب'}</p></div>`).join(''):'<p class="muted">لا رسائل بعد.</p>';
+  if(rows[0])localStorage.setItem('swk_chan_seen',rows[0].created_at);
+  setBadge(false);
+}
 async function renderMyAsks(){
   const el=document.getElementById('myAsks');if(!sb){el.innerHTML='';return;}
   const {data,error}=await sb.from('asks').select('*').order('created_at',{ascending:false});
-  el.innerHTML=(!error&&data&&data.length)?'<div class="sec-title" style="margin-top:6px"><span class="bar"></span> أسئلتي</div>'+data.map(a=>`<div class="card" style="margin-bottom:10px"><b>${esc(a.title)}</b><p class="muted" style="margin-top:6px">${esc(a.body)}</p><span class="pill ${a.answered?'ok':'no'}" style="margin-top:8px;display:inline-block">${a.answered?'تمت الإجابة ✅':'قيد الانتظار ⏳'}</span></div>`).join(''):'';
+  el.innerHTML=(!error&&data&&data.length)?'<div class="sec-title" style="margin-top:6px"><span class="bar"></span> أسئلتي</div>'+data.map(a=>`<div class="card" style="margin-bottom:10px"><b>${esc(a.title)}</b><p class="muted" style="margin-top:6px">${esc(a.body)}</p>${a.answer?`<div style="margin-top:10px;padding:12px;border-radius:14px;background:rgba(52,211,153,.1);border:1px solid rgba(52,211,153,.35)"><b style="color:#34D399">✅ جواب Kamy</b><p style="white-space:pre-wrap;margin-top:6px">${linkify(esc(a.answer))}</p></div>`:`<span class="pill no" style="margin-top:8px;display:inline-block">قيد الانتظار ⏳</span>`}</div>`).join(''):'';
 }
 
 /* ---------- Stats ---------- */
@@ -887,10 +918,10 @@ async function askAI(preset){
 /* ==================== ADMIN ==================== */
 document.getElementById('hAvatar').addEventListener('dblclick',async()=>{if(!await adminLogin())return;await loadAllPrograms();show('admin');adminTab('codes');});
 function adminTab(t){
-  ['codes','programs','students','asks','review','lib'].forEach(x=>document.getElementById('ad-'+x).classList.toggle('hidden',x!==t));
-  const map={codes:1,programs:2,students:3,asks:4,review:5,lib:6};
-  for(let i=1;i<=6;i++)document.getElementById('ab'+i).className='btn sm'+(i===map[t]?'':' ghost');
-  window._adTab=t;if(t==='programs')prGo('branch');if(t==='lib')renderLibAdm();
+  ['codes','programs','students','asks','review','lib','chan'].forEach(x=>document.getElementById('ad-'+x).classList.toggle('hidden',x!==t));
+  const map={codes:1,programs:2,students:3,asks:4,review:5,lib:6,chan:7};
+  for(let i=1;i<=7;i++)document.getElementById('ab'+i).className='btn sm'+(i===map[t]?'':' ghost');
+  window._adTab=t;if(t==='programs')prGo('branch');if(t==='lib')renderLibAdm();if(t==='chan')renderChanAdm();
   renderAdm();
 }
 const PG=50;
@@ -924,10 +955,32 @@ async function delStudent(i){
 }
 function askPage(d){window._askPg=Math.max(0,(window._askPg||0)+d);admAsks();}
 async function admAsks(){
-  const pg=window._askPg||0,{data,count,error}=await sb.from('asks').select('*, students(name)',{count:'exact'}).order('answered',{ascending:true}).order('created_at',{ascending:false}).range(pg*PG,pg*PG+PG-1);
+  const pg=window._askPg||0,{data,count,error}=await sb.from('asks').select('*, students(name,branch)',{count:'exact'}).order('answered',{ascending:true}).order('created_at',{ascending:false}).range(pg*PG,pg*PG+PG-1);
   if(error){toast('⚠️ '+error.message);return;}
-  document.getElementById('askList').innerHTML=((data||[]).length?data.map(x=>`<div class="list-item" style="align-items:flex-start"><div><b>${esc(x.title)}</b> <span class="muted">— ${esc(x.students&&x.students.name)}</span><p class="muted" style="margin-top:4px">${esc(x.body)}</p></div>${x.answered?'<span class="pill ok">تمت الإجابة</span>':`<button class="btn sm ghost" onclick="answerAsk(${x.id})">✔ جاوبت</button>`}</div>`).join(''):'<p class="muted">لا أسئلة واردة.</p>')+pager(pg,count||0,'askPage');
+  window._asks=data||[];
+  document.getElementById('askList').innerHTML=((data||[]).length?data.map((x,i)=>`<div class="card" style="margin-bottom:10px"><b>${esc(x.title)}</b> <span class="muted">— ${esc(x.students&&x.students.name)} • ${esc(x.students&&x.students.branch||'')}</span><p style="margin:6px 0 10px;white-space:pre-wrap">${esc(x.body)}</p>${x.answer?`<div style="padding:10px;border-radius:12px;background:rgba(52,211,153,.1)"><b style="color:#34D399">✅ جوابك</b><p style="white-space:pre-wrap;margin-top:4px">${esc(x.answer)}</p></div>`:`<textarea class="inp" id="ans${i}" placeholder="اكتب جوابك للتلميذ..."></textarea><label class="muted" style="display:flex;gap:8px;align-items:center;margin:6px 0 10px"><input type="checkbox" id="pub${i}" style="width:auto"> انشر السؤال والجواب في قناة الشعبة (دون اسم التلميذ)</label><button class="btn sm green" onclick="sendAnswer(${i})">📤 إرسال الجواب</button>`}</div>`).join(''):'<p class="muted">لا أسئلة واردة.</p>')+pager(pg,count||0,'askPage');
 }
+async function sendAnswer(i){
+  const x=(window._asks||[])[i];if(!x)return;
+  const t=document.getElementById('ans'+i).value.trim();if(!t){toast('⚠️ اكتب الجواب أولاً');return;}
+  const pub=document.getElementById('pub'+i).checked;
+  const {error}=await sb.from('asks').update({answer:t,answered:true,answered_at:new Date().toISOString()}).eq('id',x.id);
+  if(error){toast('⚠️ '+error.message);return;}
+  if(pub&&x.students&&x.students.branch)await sb.from('channel_posts').insert({branch:x.students.branch,body:'❓ '+x.title+'\n'+x.body+'\n\n✅ '+t});
+  toast('✅ أُرسل الجواب');admAsks();
+}
+async function renderChanAdm(){
+  const sel=document.getElementById('chBranch');if(sel&&sel.options.length<2)sel.innerHTML='<option value="">كل الشعب</option>'+Object.keys(PROG).map(b=>`<option>${esc(b)}</option>`).join('');
+  const {data,error}=await sb.from('channel_posts').select('*').order('created_at',{ascending:false}).limit(50);
+  document.getElementById('chList').innerHTML=error?'<p class="muted">⚠️ '+esc(error.message)+'</p>':((data||[]).map(r=>`<div class="list-item" style="align-items:flex-start"><div><b>${esc(r.branch||'كل الشعب')}</b> <span class="muted">• ${esc(fmtT(r.created_at))}</span><p style="white-space:pre-wrap;margin-top:4px">${esc(r.body)}</p></div><button class="btn sm red" onclick="delPost(${r.id})">حذف</button></div>`).join('')||'<p class="muted">لا رسائل بعد.</p>');
+}
+async function postChan(){
+  const b=document.getElementById('chBranch').value||null,t=document.getElementById('chText').value.trim();
+  if(!t){toast('⚠️ اكتب الرسالة');return;}
+  const {error}=await sb.from('channel_posts').insert({branch:b,body:t});if(error){toast('⚠️ '+error.message);return;}
+  document.getElementById('chText').value='';toast('📢 نُشرت الرسالة');renderChanAdm();
+}
+async function delPost(id){if(!confirm('حذف هذه الرسالة؟'))return;await sb.from('channel_posts').delete().eq('id',id);renderChanAdm();}
 function revPage(d){window._revPg=Math.max(0,(window._revPg||0)+d);admReviews();}
 async function admReviews(){
   const pg=window._revPg||0,{data,count,error}=await sb.from('reviews').select('*, students(name)',{count:'exact'}).order('created_at',{ascending:false}).range(pg*PG,pg*PG+PG-1);
