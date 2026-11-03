@@ -272,6 +272,22 @@ input[type=file]::file-selector-button{background:var(--card2);color:#fff;border
     <div id="tRes"></div>
     <div id="tVideo"><div class="video-ph">🎬 فيديو الدرس — يُضاف من لوحة تحكم Kamy</div></div>
     <div id="tBac"></div>
+
+    <!-- Pomodoro -->
+    <div class="card" style="margin-top:14px;text-align:center;background:var(--card2)">
+      <div class="muted" id="pmMode">🍅 وقت التركيز</div>
+      <div id="pmTime" style="font-size:2.6rem;font-weight:800;margin:6px 0;direction:ltr">25:00</div>
+      <div style="display:flex;gap:6px;justify-content:center;margin-bottom:10px">
+        <button class="weekday on" id="pmP1" style="padding:6px 16px" onclick="pmSet(25,5)">25 / 5</button>
+        <button class="weekday" id="pmP2" style="padding:6px 16px" onclick="pmSet(50,10)">50 / 10</button>
+      </div>
+      <div style="display:flex;gap:8px;justify-content:center">
+        <button class="btn sm" id="pmGo" onclick="pmToggle()">▶ ابدأ</button>
+        <button class="btn sm ghost" onclick="pmReset()">↺ إعادة</button>
+      </div>
+      <div class="muted" style="margin-top:8px" id="pmCount"></div>
+    </div>
+
     <button class="btn green" style="width:100%;padding:13px;margin-top:14px" id="tDoneBtn" onclick="taskDone()">✔ تم — أنهيت المهمة</button>
     <button class="btn ghost" style="width:100%;margin-top:8px" onclick="askReview()">🔁 ما فهمتش — راجع هذا الدرس</button>
     <button class="btn ghost" style="width:100%;margin-top:8px" onclick="show('ask')">❓ اطرح سؤالاً خاصاً على Kamy</button>
@@ -789,20 +805,29 @@ function openTask(idx,label){
   const vsrc=ym?'https://www.youtube.com/embed/'+ym[1]:(/^https:\/\//i.test(vid)?vid:'');
   document.getElementById('tVideo').innerHTML=vsrc?`<div class="video-frame"><iframe src="${esc(vsrc)}" allowfullscreen></iframe></div>`:`<div class="video-ph">🎬 لا فيديو مخصص لهذا الدرس بعد<br><a class="btn sm ghost" style="margin-top:10px;display:inline-block" href="${esc(ytSearch(sess))}" target="_blank" rel="noopener noreferrer">🔎 ابحث عن شرحه في يوتيوب</a></div>`;
   renderBac(sess);
-  const done=S.done.includes(idx+label);
-  const b=document.getElementById('tDoneBtn');
-  b.disabled=done;b.textContent=done?'✅ تم إنجازها':'✔ تم — أنهيت المهمة';
+  setDoneBtn(S.done.includes(idx+label));pmDraw();
   show('task');
+}
+function setDoneBtn(done){
+  const b=document.getElementById('tDoneBtn');
+  b.disabled=false;
+  b.className=done?'btn ghost':'btn green';
+  b.textContent=done?'↩️ إلغاء الإنجاز (Annuler)':'✔ تم — أنهيت المهمة';
 }
 function taskDone(){
   if(!curTask)return;
-  S.done.push(curTask.idx+curTask.label);
-  S.xp+=25;
-  const today=new Date().toDateString(),yest=new Date(Date.now()-86400000).toDateString();
-  if(S.lastStudy!==today){S.streak=S.lastStudy===yest?S.streak+1:1;S.lastStudy=today;}
+  const k=curTask.idx+curTask.label,i=S.done.indexOf(k);
+  if(i>-1){
+    S.done.splice(i,1);S.xp=Math.max(0,S.xp-25);
+    toast('↩️ تم إلغاء الإنجاز');
+  }else{
+    S.done.push(k);S.xp+=25;
+    const today=new Date().toDateString(),yest=new Date(Date.now()-86400000).toDateString();
+    if(S.lastStudy!==today){S.streak=S.lastStudy===yest?S.streak+1:1;S.lastStudy=today;}
+    toast('🎉 أحسنت! +25 XP');
+  }
   store.set('swk_state',S);
-  toast('🎉 أحسنت! +25 XP');
-  renderAll();document.getElementById('tDoneBtn').disabled=true;document.getElementById('tDoneBtn').textContent='✅ تم إنجازها';
+  renderAll();setDoneBtn(i<=-1);
 }
 function askReview(){
   if(!curTask)return;
@@ -815,6 +840,42 @@ function renderReview(){
     `<div class="list-item"><span>🔁 ${esc(r.t)} <span class="muted">(${esc(r.s)}) — ${esc(r.d)}</span></span>
     <button class="btn sm ghost" onclick="S.review.splice(${i},1);store.set('swk_state',S);renderReview()">فهمتها ✔</button></div>`).join('')
     :'<p class="muted">✅ لا دروس للمراجعة — كلشي واضح!</p>';
+}
+
+/* ---------- Pomodoro ---------- */
+const PM={f:25,b:5,mode:'focus',left:1500,end:0,t:null};
+const pmFmt=s=>String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0');
+function pmToday(){const d=new Date().toDateString();return S.pomo&&S.pomo.d===d?S.pomo.n:0;}
+function pmDraw(){
+  const g=id=>document.getElementById(id);
+  g('pmTime').textContent=pmFmt(PM.left);
+  g('pmMode').textContent=PM.mode==='focus'?'🍅 وقت التركيز':'☕ وقت الراحة';
+  g('pmGo').textContent=PM.t?'⏸ إيقاف':'▶ ابدأ';
+  g('pmP1').classList.toggle('on',PM.f===25);
+  g('pmP2').classList.toggle('on',PM.f===50);
+  g('pmCount').textContent='🍅 جلسات اليوم: '+pmToday();
+  document.title=PM.t?pmFmt(PM.left)+' • Study with Kamy':'Study with Kamy';
+}
+function pmSet(f,b){if(PM.t){toast('⏸ أوقف المؤقت أولاً');return;}PM.f=f;PM.b=b;PM.mode='focus';PM.left=f*60;pmDraw();}
+function pmToggle(){
+  if(PM.t){clearInterval(PM.t);PM.t=null;PM.left=Math.max(0,Math.round((PM.end-Date.now())/1000));}
+  else{PM.end=Date.now()+PM.left*1000;PM.t=setInterval(pmTick,500);}
+  pmDraw();
+}
+function pmReset(){clearInterval(PM.t);PM.t=null;PM.mode='focus';PM.left=PM.f*60;pmDraw();}
+function pmBeep(){
+  try{const a=new (window.AudioContext||window.webkitAudioContext)(),o=a.createOscillator(),g=a.createGain();o.connect(g);g.connect(a.destination);o.frequency.value=880;g.gain.value=.2;o.start();o.stop(a.currentTime+.6);}catch(e){}
+  try{navigator.vibrate&&navigator.vibrate([300,100,300]);}catch(e){}
+}
+function pmTick(){
+  PM.left=Math.max(0,Math.round((PM.end-Date.now())/1000));
+  if(PM.left>0){pmDraw();return;}
+  pmBeep();
+  if(PM.mode==='focus'){
+    S.pomo={d:new Date().toDateString(),n:pmToday()+1};store.set('swk_state',S);
+    PM.mode='break';PM.left=PM.b*60;toast('🎉 انتهت الجلسة — خذ راحة');
+  }else{PM.mode='focus';PM.left=PM.f*60;toast('💪 جلسة تركيز جديدة');}
+  PM.end=Date.now()+PM.left*1000;pmDraw();
 }
 
 /* ---------- Ask ---------- */
