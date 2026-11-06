@@ -273,6 +273,12 @@ input[type=file]::file-selector-button{background:var(--card2);color:#fff;border
     <div id="tVideo"><div class="video-ph">🎬 فيديو الدرس — يُضاف من لوحة تحكم Kamy</div></div>
     <div id="tBac"></div>
 
+    <!-- AI exercise generator -->
+    <div class="card" style="margin-top:14px;background:var(--card2)">
+      <button class="btn" style="width:100%" id="gxBtn" onclick="genEx()">🤖 ولّد لي تمرين بكالوريا على هذا الدرس</button>
+      <div id="gxBox" style="margin-top:12px"></div>
+    </div>
+
     <!-- Pomodoro -->
     <div class="card" style="margin-top:14px;text-align:center;background:var(--card2)">
       <div class="muted" id="pmMode">🍅 وقت التركيز</div>
@@ -491,6 +497,8 @@ input[type=file]::file-selector-button{background:var(--card2);color:#fff;border
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
 <script>
 /* ==================== CONFIG ==================== */
+/* اسم دالة Gemini في Supabase (Edge Functions). بدّله إذا سميتها باسم آخر */
+const AI_FN='assistant';
 const BAC_DATE=new Date('2027-06-06T08:00:00');
 let START_DATE=new Date(store_get('swk_start','2026-10-19'));
 function store_get(k,d){try{const v=localStorage.getItem(k);return v!==null?JSON.parse(v):d}catch(e){return d}}
@@ -514,9 +522,21 @@ const bacToText=l=>(l||[]).map(b=>[b.s,b.t,b.u,b.a||''].join('|')).join('\n');
 const textToBac=t=>t.split('\n').map(l=>l.split('|').map(x=>x.trim())).filter(a=>a.length>=3&&a[0]&&okUrl(a[2])).map(a=>{const o={s:a[0],t:a[1]||a[0],u:a[2]};if(a[3]&&okUrl(a[3]))o.a=a[3];return o;});
 const ytSearch=x=>'https://www.youtube.com/results?search_query='+encodeURIComponent(x.s+' '+x.t+' بكالوريا الجزائر');
 const bacSearch=x=>'https://www.google.com/search?q='+encodeURIComponent('تمرين بكالوريا '+x.s+' '+x.t+' الجزائر مع التصحيح');
+/* اختبارات الباك حسب المادة (المصدر: a-onec.com) — تظهر في كل درس من المادة */
+const _A='https://www.a-onec.com/';
+const _bx=(y,lbl,e,c)=>{const o={s:'بكالوريا '+y+' — '+lbl,t:'الاختبار كاملاً',u:_A+y+'/'+e};if(c)o.a=_A+y+'/'+c;return o;};
+const _M=[_bx(2024,'رياضيات','06/bac-math-se.html','06/correction-bac-math-se.html'),_bx(2023,'رياضيات','05/bac-math-se.html','06/correction-bac-math-se.html')];
+const _P=[_bx(2024,'فيزياء','06/bac-physique-se.html','06/correction-bac-se-physique.html'),_bx(2023,'فيزياء','05/bac-physique-se.html','06/correction-bac-se-physique.html')];
+const _V=[_bx(2024,'علوم الطبيعة','06/bac-science-se.html','06/correction-bac-science-se.html'),_bx(2023,'علوم الطبيعة','05/bac-science-se.html','06/correction-bac-science-se.html')];
+const _AR=[_bx(2024,'اللغة العربية','06/bac-arabe-se.html','06/correction-bac-arabe-se.html'),_bx(2023,'اللغة العربية','05/bac-arabe-se.html','')];
+const _HG=[_bx(2024,'التاريخ والجغرافيا','06/bac-sci-his-geo.html','06/correction-bac-sci-his-geo.html'),_bx(2023,'التاريخ والجغرافيا','05/bac-sci-his-geo.html','06/correction-bac-sci-his-geo.html')];
+const _IS=[_bx(2024,'العلوم الإسلامية','06/islamic-bac.sujet.html','06/correction-bac-islamic.html'),_bx(2023,'العلوم الإسلامية','05/islamic-bac.sujet.html','06/correction-bac-islamic.html')];
+const BAC_SUBJ={'علوم تجريبية':{'الرياضيات':_M,'الفيزياء':_P,'الكيمياء':_P,'علوم الطبيعة والحياة':_V,'اللغة العربية':_AR,'العلوم الإسلامية':_IS,'مراجعة إسلامية':_IS,'التاريخ':_HG,'الجغرافيا':_HG}};
 function renderBac(x){
-  const box=document.getElementById('tBac'),l=(x.bac||[]).filter(b=>okUrl(b.u));window._bacCur=l;
-  box.innerHTML=l.length?'<div class="sec-title" style="margin:16px 0 8px"><span class="bar"></span> 📝 تطبيق Bac</div>'+l.map((b,i)=>`<div class="card" style="margin-bottom:10px"><b>${bacTag(b.s)} ${esc(b.s)}</b><p class="muted" style="margin:6px 0 10px">${esc(b.t)}</p><a class="btn sm" style="display:inline-block" href="${esc(b.u)}" target="_blank" rel="noopener noreferrer">📄 فتح التمرين</a>${b.a?`<div id="bacSol${i}" style="margin-top:10px"><button class="btn sm ghost" onclick="showSol(${i})">✅ حاولت الحل — أظهر التصحيح</button></div>`:''}</div>`).join(''):`<div class="video-ph">📝 لا تمرين بكالوريا مخصص لهذا الدرس بعد<br><a class="btn sm ghost" style="margin-top:10px;display:inline-block" href="${esc(bacSearch(x))}" target="_blank" rel="noopener noreferrer">🔎 ابحث عن تمرين بكالوريا</a></div>`;
+  const own=x.bac||[],seen=new Set(own.map(b=>b.u)),
+    sub=((BAC_SUBJ[user&&user.branch]||{})[x.s]||[]).filter(b=>!seen.has(b.u)).map(b=>Object.assign({g:1},b));
+  const box=document.getElementById('tBac'),l=own.concat(sub).filter(b=>okUrl(b.u));window._bacCur=l;
+  box.innerHTML=l.length?'<div class="sec-title" style="margin:16px 0 8px"><span class="bar"></span> 📝 تطبيق Bac</div>'+l.map((b,i)=>`<div class="card" style="margin-bottom:10px"><b>${bacTag(b.s)} ${esc(b.s)}</b><p class="muted" style="margin:6px 0 10px">${esc(b.t)}${b.g?' — ابحث فيه عن: '+esc(x.t):''}</p><a class="btn sm" style="display:inline-block" href="${esc(b.u)}" target="_blank" rel="noopener noreferrer">📄 فتح التمرين</a>${b.a?`<div id="bacSol${i}" style="margin-top:10px"><button class="btn sm ghost" onclick="showSol(${i})">✅ حاولت الحل — أظهر التصحيح</button></div>`:''}</div>`).join(''):`<div class="video-ph">📝 لا تمرين بكالوريا مخصص لهذا الدرس بعد<br><a class="btn sm ghost" style="margin-top:10px;display:inline-block" href="${esc(bacSearch(x))}" target="_blank" rel="noopener noreferrer">🔎 ابحث عن تمرين بكالوريا</a></div>`;
 }
 function showSol(i){const b=(window._bacCur||[])[i];if(!b||!b.a)return;document.getElementById('bacSol'+i).innerHTML=`<a class="btn sm green" style="display:inline-block" href="${esc(b.a)}" target="_blank" rel="noopener noreferrer">📘 التصحيح النموذجي</a>`;}
 async function runImport(){
@@ -806,6 +826,7 @@ function openTask(idx,label){
   document.getElementById('tVideo').innerHTML=vsrc?`<div class="video-frame"><iframe src="${esc(vsrc)}" allowfullscreen></iframe></div>`:`<div class="video-ph">🎬 لا فيديو مخصص لهذا الدرس بعد<br><a class="btn sm ghost" style="margin-top:10px;display:inline-block" href="${esc(ytSearch(sess))}" target="_blank" rel="noopener noreferrer">🔎 ابحث عن شرحه في يوتيوب</a></div>`;
   renderBac(sess);
   setDoneBtn(S.done.includes(idx+label));pmDraw();
+  {const gb=document.getElementById('gxBox');if(gb)gb.innerHTML='';}
   show('task');
 }
 function setDoneBtn(done){
@@ -840,6 +861,35 @@ function renderReview(){
     `<div class="list-item"><span>🔁 ${esc(r.t)} <span class="muted">(${esc(r.s)}) — ${esc(r.d)}</span></span>
     <button class="btn sm ghost" onclick="S.review.splice(${i},1);store.set('swk_state',S);renderReview()">فهمتها ✔</button></div>`).join('')
     :'<p class="muted">✅ لا دروس للمراجعة — كلشي واضح!</p>';
+}
+
+/* ---------- AI exercise generator ---------- */
+async function gxAsk(prompt){
+  const ctx='الشعبة: '+user.branch+(user.track?' ('+user.track+')':'');
+  const {data,error}=await sb.functions.invoke(AI_FN,{body:{messages:[{role:'user',text:prompt}],context:ctx}});
+  if(error){const st=error.context&&error.context.status;throw new Error(st===429?'limit':'fail');}
+  if(!data||!data.text)throw new Error('fail');
+  return data.text;
+}
+async function genEx(){
+  if(!sb||!curTask)return;
+  const box=document.getElementById('gxBox'),btn=document.getElementById('gxBtn'),s=curTask.sess;
+  if(window._isAdmin){box.innerHTML='<p class="muted">هذه الميزة للتلاميذ فقط.</p>';return;}
+  btn.disabled=true;box.innerHTML='<p class="muted">… جاري التحضير</p>';
+  try{
+    const ex=await gxAsk('اكتب تمريناً واحداً على طريقة امتحان البكالوريا الجزائرية في مادة '+s.s+' حول درس: '+s.t+'. اكتب نص التمرين فقط مع الأسئلة مرقمة، دون أي حل ولا تلميحات.');
+    window._gxEx=ex;
+    box.innerHTML='<div class="msg ai" style="max-width:100%">'+mdHTML(ex)+'</div><button class="btn sm ghost" id="gxSol" onclick="genSol()">✅ حاولت الحل — أظهر التصحيح</button><p class="muted" style="margin-top:8px">⚠️ تمرين مولّد بالذكاء الاصطناعي، تحقق من الحل مع أستاذك.</p>';
+  }catch(e){box.innerHTML='<p class="muted">'+(e.message==='limit'?'⏳ وصلت للحد اليومي. جرّب غداً.':'⚠️ تعذر التوليد، أعد المحاولة.')+'</p>';}
+  btn.disabled=false;
+}
+async function genSol(){
+  const b=document.getElementById('gxSol');if(!b)return;
+  b.disabled=true;b.textContent='… جاري التحضير';
+  try{
+    const sol=await gxAsk('هذا التمرين:\n'+window._gxEx+'\n\nاكتب الحل النموذجي مفصلاً خطوة بخطوة.');
+    b.outerHTML='<div class="msg ai" style="max-width:100%;margin-top:10px">'+mdHTML(sol)+'</div>';
+  }catch(e){b.disabled=false;b.textContent='✅ حاولت الحل — أظهر التصحيح';toast(e.message==='limit'?'⏳ وصلت للحد اليومي':'⚠️ تعذر التوليد');}
 }
 
 /* ---------- Pomodoro ---------- */
@@ -966,7 +1016,7 @@ async function askAI(preset){
   window._chat.push({role:'user',text:q});
   let reply=null,note='';
   try{
-    const {data,error}=await sb.functions.invoke('assistant',{body:{messages:window._chat.slice(-8),context:aiContext()}});
+    const {data,error}=await sb.functions.invoke(AI_FN,{body:{messages:window._chat.slice(-8),context:aiContext()}});
     if(error){const st=error.context&&error.context.status;if(st===429)note='limit';else if(st===401||st===403)note='auth';}
     else if(data&&data.text)reply=data.text;
   }catch(e){}
